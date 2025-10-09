@@ -1,9 +1,4 @@
-/*
- * main.cpp
- *
- *  Created on: 14 Oct 2022
- *      Author: Xinjie ZHOU
- */
+
 #include "head.h"
 
 int main(int argc, char** argv){

@@ -1,9 +1,4 @@
-/*
- * TreeIndex.cpp
- *
- *  Created on: 16 June 2023
- *      Author: Xinjie ZHOU
- */
+
 #include "head.h"
 
 vector<int> NodeOrder_;//nodeID order

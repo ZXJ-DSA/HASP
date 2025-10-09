@@ -1,5 +1,4 @@
-// Basic classes, Timer, Semaphore, Heap
-// created by Mengxuan, modified by Xinjie
+
 
 #pragma once
 

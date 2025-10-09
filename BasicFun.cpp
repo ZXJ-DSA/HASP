@@ -1,9 +1,4 @@
-/*
- * BasicFun.cpp
- *
- *  Created on: 13 Oct 2022
- *      Author: zhangmengxuan
- */
+
 #include "head.h"
 
 extern vector<int> NodeOrder_;//nodeID order

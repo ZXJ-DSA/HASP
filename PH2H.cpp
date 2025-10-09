@@ -1,9 +1,4 @@
-/*
- * Construction.cpp
- *
- *  Created on: 24 August 2023
- *      Author: Xinjie ZHOU
- */
+
 #include "head.h"
 #include "PH2H.hpp"
 

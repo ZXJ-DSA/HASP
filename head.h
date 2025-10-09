@@ -1,9 +1,3 @@
-/*
- * head.h
- *
- *  Created on: 24 August 2022
- *      Author: Xinjie ZHOU
- */
 
 #ifndef HEAD_H_
 #define HEAD_H_
