@@ -1,6 +1,7 @@
 # HASP
 The implementation code of paper "A Spatio-temporal Optimized Framework for High-throughput
-Shortest Distance Query Processing on Dynamic Road Networks" (Submitted to VLDB 2026). Please refer to the paper for the algorithm details. 
+
+Shortest Distance Query Processing on Dynamic Road Networks" (Submitted to SIGMOD 2026). Please refer to the paper for the algorithm details. 
 
 
 ## Algorithms
