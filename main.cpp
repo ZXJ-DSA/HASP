@@ -8,15 +8,15 @@ int main(int argc, char** argv){
         printf("<arg2> name of dataset, e.g. NY\n");
 //        printf("<arg3> HTSP system index, 1: CH+H2H; 2: PH2H; 3: PCH+PH2H; 4: Optimized PCH+PH2H; 5: PostMHL. default: 2\n");
         printf("<arg3> HTSP system index, 5: PostMHL; 6: DVPL. default: 6\n");//1: CH+H2H; 3: PCH+PH2H;
-        printf("<arg4> (optional) average query response time requirement, in seconds. default: 1\n");
+        printf("<arg4> (optional) average query response time requirement, in seconds. default: 0.5\n");
         printf("<arg5> (optional) partition number, e.g. 64\n");
         printf("<arg6> (optional) partition method, (NC: PUNCH; MT: METIS), default: NC\n");
         printf("<arg7> (optional) query strategy, (0:A*; 1: PCH (CH); 2: No-boundary; 3: Post-boundary; 4: Cross-boundary (H2H)), default: 4\n");
-        printf("<arg8> (optional) update type, (0: No Update Test; 1: Decrease; 2: Increase), e.g. 1\n");
-        printf("<arg9> (optional) batch number, e.g. 10\n");
+        printf("<arg8> (optional) update type, (0: No Update Test; 1: Decrease; 2: Increase), default: 0\n");
+        printf("<arg9> (optional) batch number, default: 10\n");
         printf("<arg10> (optional) cache list number, eg. 20\n");
         printf("<arg11> (optional) batch interval (in seconds), default: 300\n");
-        printf("<arg12> (optional) thread number, e.g. 150\n");
+        printf("<arg12> (optional) thread number, default: 15\n");
         printf("<arg13> (optional) query worker number, default: 1\n");
         printf("<arg15> (optional) region number for VPL, default: 4\n");
         printf("<arg16> (optional) bandwidth, default: 50\n");
@@ -59,7 +59,12 @@ int main(int argc, char** argv){
         dataset = argv[2];
 
         cout << "argv[3] (System Index): " << argv[3] << endl;//system index
+
         algoChoice = stoi(argv[3]);
+        if (algoChoice < 5 || algoChoice > 6) {
+            cout << "wrong index type " << algoChoice << endl;
+            exit(1);
+        }
 
         if(argc > 4){
             cout << "argv[4] (Query Response Time, s): " << argv[4] << endl;//query response time

@@ -8,7 +8,7 @@ The implementation code includes the index construction, query processing, and i
 
 
 ## Data
-The datasets of this paper are sourced from [NavInfo](https://en.navinfo.com/). We make the beijing dataset public in the `datasets` directory. After unzipping the zip file, you can run `./datasets beijing 6 1 32 NC 4 2 2 20 300 15 1 2 100 0.1 2` to have a taste.
+The datasets of this paper are sourced from [NavInfo](https://en.navinfo.com/). We make the beijing dataset public in the `datasets` directory. After unzipping the zip file, you can run `./DPH2H ./datasets beijing 6 1 32 NC 4 2 2 20 300 15 1 2 100 0.1 2` to have a taste.
 
 
 

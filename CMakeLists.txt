@@ -53,7 +53,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 
 # boost
-find_package(Boost 1.71.0 COMPONENTS system filesystem REQUIRED)
+find_package(Boost 1.67.0 COMPONENTS system filesystem REQUIRED)
 if (Boost_FOUND)
     message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARY_DIRS}")
@@ -82,7 +82,7 @@ add_definitions(-w) # omit warning information
 #set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,${stack_size}")
 
 add_executable(DPH2H main.cpp BasicFun.cpp PH2H.cpp)
-#add_executable(DH2H mainH2H.cpp BasicFunH2H.cpp H2H.cpp)
+add_executable(DH2H mainH2H.cpp BasicFunH2H.cpp H2H.cpp)
 
 #target_link_libraries(DPH2H PRIVATE "-Wl,--stack,10000000")
 
@@ -94,11 +94,11 @@ add_executable(DPH2H main.cpp BasicFun.cpp PH2H.cpp)
 if (Boost_FOUND)
     if(UNIX AND NOT APPLE)
         target_link_libraries(DPH2H pthread boost_system boost_thread)# For linux
-        #target_link_libraries(DH2H pthread boost_system boost_thread)# For linux
+        target_link_libraries(DH2H pthread boost_system boost_thread)# For linux
     endif()
     if(APPLE)
         target_link_libraries(DPH2H boost_system boost_thread-mt)# For mac
-        #target_link_libraries(DH2H boost_system boost_thread-mt)# For mac
+        target_link_libraries(DH2H boost_system boost_thread-mt)# For mac
 
     endif()
 endif ()
