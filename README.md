@@ -1,7 +1,5 @@
 # HASP
-The implementation code of paper "A Spatio-temporal Optimized Framework for High-throughput
-
-Shortest Distance Query Processing on Dynamic Road Networks" (Submitted to SIGMOD 2026). Please refer to the paper for the algorithm details. 
+The implementation code of our paper. Please refer to the paper for the algorithm details. 
 
 
 ## Algorithms
@@ -19,3 +17,4 @@ The datasets of this paper are sourced from [NavInfo](https://en.navinfo.com/). 
 1. `g++` and `boost`
 
 All the codes are runnable after `cmake` and `make`: go to the corresponding directory, `cmake -DCMAKE_BUILD_TYPE=Release ./` and `make -j`.
+
