@@ -1,5 +1,3 @@
-
-
 #pragma once
 
 #include <mutex>
@@ -7,58 +5,41 @@
 #include <vector>
 #include <chrono>
 
-struct Timer
-{
+struct Timer {
 private:
     std::chrono::high_resolution_clock::time_point t1, t2;//varibles for time record
-//    std::chrono::steady_clock::time_point t1, t2;//varibles for time record
     std::chrono::duration<double> time_span;
-//    std::chrono::time_point<std::chrono::high_resolution_clock> m_begin, m_end;
 public:
-    void start()
-    {
+    void start() {
         t1 = std::chrono::high_resolution_clock::now();
-//        t1 = std::chrono::steady_clock::now();
-//        m_begin = std::chrono::high_resolution_clock::now();
     }
-    void stop()
-    {
+
+    void stop() {
         t2 = std::chrono::high_resolution_clock::now();
-//        t2 = std::chrono::steady_clock::now();
-//        m_end = std::chrono::high_resolution_clock::now();
     }
+
     double GetRuntime()//return time in second
     {
         time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);//std::chrono::nanoseconds
         return time_span.count();
     }
-//    int64_t GetRuntime2() const//return time in second
-//    {
-//        time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);//std::chrono::nanoseconds
-//        return time_span.count();
-//        return std::chrono::duration_cast<std::chrono::nanoseconds>(m_end - m_begin).count();//
-//    }
 };
 
-class Semaphore
-{
+class Semaphore {
 public:
-    Semaphore (int count_ = 0)
+    Semaphore(int count_ = 0)
             : count(count_) {}
 
-    inline void notify()
-    {
+    inline void notify() {
         std::unique_lock<std::mutex> lock(mtx);
         count++;
         cv.notify_one();
     }
 
-    inline void wait()
-    {
+    inline void wait() {
         std::unique_lock<std::mutex> lock(mtx);
 
-        while(count == 0)
-        {
+        while (count == 0) {
             cv.wait(lock);
 
         }
@@ -75,7 +56,7 @@ namespace benchmark {
 
 #define NULLINDEX 0xFFFFFFFF
 
-    template<int log_k, typename id_t, typename k_t >//id,value
+    template<int log_k, typename id_t, typename k_t>//id,value
     class heap {//binary heap
     public:
 
@@ -105,13 +86,14 @@ namespace benchmark {
             // state, max_n is the size of heap
         }
 
-        heap(): n(0), max_n(0), elements(0), position(0, NULLINDEX) {}
+        heap() : n(0), max_n(0), elements(0), position(0, NULLINDEX) {}
 
-        ~heap(){}
+        ~heap() {}
 
         // Risize the heap
-        inline void resize(node_t a){
-            n = 0; max_n = a;
+        inline void resize(node_t a) {
+            n = 0;
+            max_n = a;
             elements.resize(a);
             position.resize(a, NULLINDEX);
         }
@@ -210,10 +192,10 @@ namespace benchmark {
         }
 
         //return current elements information
-        void get_elements(std::vector<std::pair<int,int>> &e_vector){
-            std::pair<int,int> temp_pair;
+        void get_elements(std::vector<std::pair<int, int>> &e_vector) {
+            std::pair<int, int> temp_pair;
 
-            for(int i=0;i<n;i++){
+            for (int i = 0; i < n; i++) {
                 temp_pair.first = elements[i].key;
                 temp_pair.second = elements[i].element;
                 e_vector.push_back(temp_pair);
