@@ -1,24 +1,40 @@
 #include "headH2H.h"
 #include <boost/program_options.hpp>
-
+#define DIJK 1
+#define CHIndex 2
+#define H2HIndex 3
+#define BIDIJK 4
+#define DEFAULT_INDEX CHIndex
+#define DEFAULT_PNUM 32
+#define DEFAULT_RNUM 4
+#define DEFAULT_QUERY 4
+#define DEFAULT_PMETHOD "NC"
+#define DEFAULT_UTYPE 0
+#define DEFAULT_BSIZE 100
+#define DEFAULT_BNUM 1
+#define DEFAULT_UINTERVAL 300
+#define DEFAULT_RESPONSETIME 1.0
+#define DEFAULT_WORKNUM 1
+#define DEFAULT_QNUM 10000
+#define DEFAULT_THREADNUM 15
+#define DEFAULT_CACHESIZE 30
 namespace po = boost::program_options;
 
 int main(int argc, char **argv) {
     // ===================== 1. Define Original Variables (Keep All Names) =====================
     string DesFile = "./data/";
     string dataset = "NY";
-    int algorithm = 2;
-    int updateType = 0;
-    int runtimes = 1000; // Fixed value, no need to parse
-    // runtimes=100; // Keep original comment
-    int batchNum = 10;
-    int batchSize = 10; // Original unused variable, keep
-    int batchInterval = 60; // Original default value (not 10, follow variable init)
-    int threadNum = 15;
-    double T_r = 1; // Average query response time (default 1)
+    int algorithm = DEFAULT_INDEX;
+    int updateType = DEFAULT_UTYPE;
+    int runtimes = DEFAULT_QNUM; // Fixed value, no need to parse
+    int batchNum = DEFAULT_BNUM;
+    int batchSize = DEFAULT_BSIZE; // Original unused variable, keep
+    int batchInterval = DEFAULT_UINTERVAL; // Original default value (not 10, follow variable init)
+    int threadNum = DEFAULT_THREADNUM;
+    double T_r = DEFAULT_RESPONSETIME; // Average query response time (default 1)
     string queryFName;
-    int workerNum = 15;
-    int cacheSize = 20;
+    int workerNum = DEFAULT_WORKNUM;
+    int cacheSize = DEFAULT_CACHESIZE;
 
     try {
         // ===================== 2. Define Boost Parameter Options =====================
@@ -28,20 +44,20 @@ int main(int argc, char **argv) {
                 ("source_path,s", po::value<string>()->required(),
                  "Source path (required), e.g. /export/project/xzhouby")
                 ("dataset,d", po::value<string>()->required(), "Name of dataset (required), e.g. NY")
-                ("algorithm,a", po::value<int>()->required(),
-                 "Algorithm (required): 0=Dijkstra; 1=CH; 2=H2H; 3=BiDijkstra")
+                ("index,i", po::value<int>()->required(),
+                 "SP Index/algorithm (required): 0=Dijkstra; 1=CH; 2=H2H; 3=BiDijkstra")
 
                 // Optional parameters (match original argv[4]-argv[11], keep original defaults)
-                ("response_time,r", po::value<double>()->default_value(1),
-                 "Average query response time requirement (seconds), default: 1")
-                ("update_type,u", po::value<int>()->default_value(0),
+                ("response_time,r", po::value<double>()->default_value(DEFAULT_RESPONSETIME),
+                 "Average query response time requirement (seconds), default: 1.0")
+                ("update_type,u", po::value<int>()->default_value(DEFAULT_UTYPE),
                  "Update type (0: No Update Test; 1: Decrease; 2: Increase), default: 0")
-                ("batch_num,b", po::value<int>()->default_value(10), "Batch number, default: 10")
-                ("cache_list_size,c", po::value<int>()->default_value(20), "Cache list number, default: 20")
-                ("batch_interval,i", po::value<int>()->default_value(60),
-                 "Batch interval (seconds), default: 60") // Follow original variable default (60)
-                ("thread_num,t", po::value<int>()->default_value(15), "Thread number, default: 15")
-                ("worker_num,w", po::value<int>()->default_value(15), "Query worker number, default: 15")
+                ("batch_num,b", po::value<int>()->default_value(DEFAULT_BNUM), "Batch number, default: 1")
+                ("cache_list_size,c", po::value<int>()->default_value(DEFAULT_CACHESIZE), "Cache list number, default: 30")
+                ("batch_interval,I", po::value<int>()->default_value(DEFAULT_UINTERVAL),
+                 "Batch interval (seconds), default: 300") // Follow original variable default (60)
+                ("thread_num,t", po::value<int>()->default_value(DEFAULT_THREADNUM), "Thread number, default: 15")
+                ("worker_num,w", po::value<int>()->default_value(DEFAULT_WORKNUM), "Query worker number, default: 15")
                 ("query_file,f", po::value<string>(), "Query file name (optional, no default)")
 
                 // Help information
@@ -64,7 +80,7 @@ int main(int argc, char **argv) {
         // Required parameters (match Boost option names → original variables)
         DesFile = vm["source_path"].as<string>();       // Original: argv[1] → DesFile
         dataset = vm["dataset"].as<string>();           // Original: argv[2] → dataset
-        algorithm = vm["algorithm"].as<int>();          // Original: argv[3] → algorithm
+        algorithm = vm["index"].as<int>();          // Original: argv[3] → algorithm
 
         // Optional parameters (Boost auto uses default if not specified)
         T_r = vm["response_time"].as<double>();         // Original: argv[4] → T_r

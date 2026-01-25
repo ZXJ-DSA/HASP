@@ -32,13 +32,16 @@
 #define Dijk 0
 #define PCH_No 1
 #define PH2H_No 2
-//#define PH2H_overlay 2
 #define PH2H_Post 3
 #define PH2H_Cross 4
 #define CH 1
 #define H2H 4
-#define MICROSEC_PER_SEC 1000000
-#define MILLISEC_PER_SEC 1000
+#define Index_MHL 1
+#define Index_PH2H 2
+#define Index_PMHLNaive 3
+#define Index_PMHL 4
+#define Index_PostMHL 5
+#define Index_DVPL 6
 #define Resolution 10000000
 #define DEC -1
 #define INC 1
@@ -286,6 +289,18 @@ struct query {
     }
 };
 
+enum class HTSPIndex {
+    AStar = 0,
+    MHL = 1,        // MHL Index
+    PH2H = 2,       // PH2H Index
+    PMHLNaive = 3,  // Naive PMHL Index
+    PMHL = 4,       // PMHL Index
+    PostMHL = 5,    // PostMHL Index
+    DVPL = 6,       // DVPL Index
+    DVPLwoR = 7,    // DVPL without Rotation update schedule
+    DVPLwoV = 8,    // DVPL without index Validation
+    DVPLwoO = 9     // DVPL without tree height-aware ordering
+};
 
 class Graph {
 public:
@@ -334,9 +349,9 @@ public:
     vector<int> DD; //intermediate variable in Contraction, DD2
     int threadnum = 15;  //thread number
     int algoQuery = 0;//algorithm for querying. 0:Dijkstra; 1: No-boundary; 2: Post-boundary; 3: Extended Label. 0: Dijkstra; 1: CH; 2:H2H. 0: Dijkstra; 1: PCH-No; 2: PH2H-No; 3: PCH-Post; 4: PH2H-Post; 5: PH2H-Extend
-    int algoUpdate = 0;//algorithm for core construction, (0: BPCL; 1: PCL; 2: PLL; 3: WPSL; 4: GLL; 5: Read)
+    int algoUpdate = 0;//algorithm for update, (0: no update; 1: decrease; 2: increase)
     string algoParti = "NC";
-    int algoChoice = 1;//HTSP system index. 1: Non-partition; 2: Partition
+    int algoChoice = static_cast<int>(HTSPIndex::DVPL);
 
     //vertex order
     vector<int> NodeOrder;//nodeID order
@@ -434,7 +449,7 @@ public:
     vector<pair<int, int>> overlayShortcutDec;//record the overlay shortcut updates caused by decrease update
 
     vector<Rect> partiMBR;//MBR of all partitions
-    RTree<Rect *, int, 2, double> rtree;
+    RTree<Rect*, int, 2, double> rtree;
 
     vector<pair<int, int>> pathComp1;
     vector<pair<int, int>> pathComp2;
@@ -660,7 +675,7 @@ public:
     /// VPL
     void VPLGraphPartitionRead(string filename);
 
-    void VPLIndexConstruct();
+    void VPLIndexConstruct(string& orderFile);
 
     void VPLShortcutConstruct();
 

@@ -4,38 +4,83 @@
 
 /// Index Construction
 void Graph::IndexConstruction() {
-    bool flag = false;
-    if (threadnum == 1) {
+    constexpr int TEMP_THREAD_NUM = 40;  // Temporary thread number for single-thread case
+    constexpr int ORIGINAL_SINGLE_THREAD = 1;
+    bool isThreadNumTemporarilyAdjusted = false;
+
+    if (threadnum == ORIGINAL_SINGLE_THREAD) {
         cout << "Single thread computation." << endl;
         threadnum = 40;
-        flag = true;
+        isThreadNumTemporarilyAdjusted = true;
     }
-    if (algoChoice == 1) {
-        cout << "System Index: CH + H2H." << endl;
-        HybridSPIndexConstruct();
-    } else if (algoChoice == 2) {
-        cout << "System Index: PH2H." << endl;
-        HybridPSPIndexConstruct();
-//        PH2HIndexConstruct();
-    } else if (algoChoice == 3) {
-        cout << "System Index: PCH + PH2H." << endl;
-        PMHLIndexConstruct();
-    } else if (algoChoice == 4) {
-        cout << "System Index: PCH + PH2H with Optimizations." << endl;
-        PMHLIndexConstructOpt();
-    } else if (algoChoice == 5) {
-        cout << "System Index: PostMHL index." << endl;
-        cout << "Bandwidth: " << bandWidth << endl;
-        PostMHLIndexConstruct();
-    } else if (algoChoice == 6) {
-        cout << "System Index: VPL index." << endl;
-        VPLIndexConstruct();
-    } else if (algoChoice == 0) {
-        cout << "A* search." << endl;
-        ReadGraph(sourcePath + "/" + dataset);//
+    HTSPIndex systemIndex = static_cast<HTSPIndex>(algoChoice);
+    switch (systemIndex) {
+        case HTSPIndex::MHL: {
+            cout << "System Index: MHL." << endl;
+            HybridSPIndexConstruct();
+            break;
+        }
+        case HTSPIndex::PH2H: {
+            cout << "System Index: PH2H." << endl;
+            HybridPSPIndexConstruct();
+            // PH2HIndexConstruct();
+            break;
+        }
+        case HTSPIndex::PMHLNaive: {
+            cout << "System Index: Naive PMHL." << endl;
+            PMHLIndexConstruct();
+            break;
+        }
+        case HTSPIndex::PMHL: {
+            cout << "System Index: Optimized PMHL." << endl;
+            PMHLIndexConstructOpt();
+            break;
+        }
+        case HTSPIndex::PostMHL: {
+            cout << "System Index: PostMHL index." << endl;
+            cout << "Bandwidth: " << bandWidth << endl;
+            PostMHLIndexConstruct();
+            break;
+        }
+        case HTSPIndex::DVPL: {
+            cout << "System Index: DVPL index." << endl;
+            string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
+                               "/vertex_orderMDEGreedy";
+            VPLIndexConstruct(orderFile);
+            break;
+        }
+        case HTSPIndex::AStar: {
+            cout << "System Index: A* search." << endl;
+            ReadGraph(sourcePath + "/" + dataset);
+            break;
+        }
+        case HTSPIndex::DVPLwoR: {
+            cout << "System Index: DVPLwoR index." << endl;
+            string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
+                               "/vertex_orderMDEGreedy";
+            VPLIndexConstruct(orderFile);
+            break;
+        }
+        case HTSPIndex::DVPLwoV: {
+            cout << "System Index: DVPLwoV index." << endl;
+            string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
+                               "/vertex_orderMDEGreedy";
+            VPLIndexConstruct(orderFile);
+            break;
+        }
+        case HTSPIndex::DVPLwoO: {
+            cout << "System Index: DVPLwoO index." << endl;
+            string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
+                               "/vertex_orderMDE2";
+            VPLIndexConstruct(orderFile);
+            break;
+        }
+        default:
+            cerr << "ERROR: Unknown algorithm choice (" << algoChoice << ") - no index construction executed!" << endl;
+            return;
     }
-    if (flag == true) {
-        threadnum = 1;
+    if (isThreadNumTemporarilyAdjusted) {
+        threadnum = ORIGINAL_SINGLE_THREAD;
     }
 }
 
@@ -610,24 +655,27 @@ void Graph::PMHLIndexConstruct() {
 }
 
 //Index construction for VPL
-void Graph::VPLIndexConstruct() {
+void Graph::VPLIndexConstruct(string& orderFile) {
     double runT1, runT2, runT3, runT4, runT5;
     runT1 = 0, runT2 = 0, runT3 = 0, runT4 = 0, runT5 = 0;
 
     /// Read order and partitions
-    string orderfile;
-//    orderfile=sourcePath+"/partitions/"+dataset+"_"+algoParti+"_"+to_string(partiNum)+"/vertex_orderMDE2";
-    orderfile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
-                "/vertex_orderMDEGreedy";
-    ifstream inFile(orderfile, ios::in);
+
+    ifstream inFile(orderFile, ios::in);
     if (!inFile) { // if not exist
-        cout << "Fail to open file" << orderfile << endl;
+        cout << "Fail to open file" << orderFile << endl;
         inFile.close();
-        PH2HVertexOrdering(3);//Boundary-first heuristic ordering
+        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+            PH2HVertexOrdering(3); // Tree height-aware PSP ordering
+        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == Index_PMHL ||
+            algoChoice == Index_PMHLNaive) {
+            PH2HVertexOrdering(2); // Naive boundary-first PSP ordering
+        }
         exit(0);
     } else {
         inFile.close();
-        ReadOrder(orderfile);
+        ReadOrder(orderFile);
     }
     if (dataset != "Test") {
         ReadCoordinate(sourcePath + "/" + dataset + ".co");
@@ -2424,7 +2472,6 @@ void Graph::PartitionOrderingBuildMDE(bool ifParallel) {
             PartitionOrdering(i);
         }
     }
-
 }
 
 //Boundary-first MDE-based vertex ordering for partition
@@ -2818,15 +2865,15 @@ void Graph::CorrectnessCheck(int runtimes) {
 //            cout<<"s: "<<s<<" ; t: "<<t<<endl;
 //        }
 
-        if (algoChoice == 1) {
+        if (algoChoice == Index_MHL) {
             tt.start();
             d2 = QueryNP(s, t);
             tt.stop();
-        } else if (algoChoice == 2) {
+        } else if (algoChoice == Index_PH2H) {
             tt.start();
             d2 = Query(s, t);
             tt.stop();
-        } else if (algoChoice == 3) {
+        } else if (algoChoice == Index_PMHLNaive) {
             tt.start();
             d2 = QueryPMHL(s, t);
             tt.stop();
@@ -2835,17 +2882,17 @@ void Graph::CorrectnessCheck(int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == 4) {
+        } else if (algoChoice == Index_PMHL) {
             tt.start();
             d2 = QueryPMHLOpt(s, t);
             tt.stop();
-        } else if (algoChoice == 5) {
+        } else if (algoChoice == Index_PostMHL) {
             tt.start();
             d2 = QueryPostMHL(s, t);
             tt.stop();
-        } else if (algoChoice == 6) {
+        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             tt.start();
-//            d2=QueryVPL(s,t);
             d2 = QueryVPL_HASP(s, t);
 //            d2=QueryVPL_HASPDebug(s,t);
             tt.stop();
@@ -2854,7 +2901,16 @@ void Graph::CorrectnessCheck(int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == 0) {
+        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoV)) {
+            tt.start();
+            d2=QueryVPL(s,t);
+            tt.stop();
+            if (PartiTag[s].first == PartiTag[t].first) {
+                sameNum++;
+            } else {
+                crossNum++;
+            }
+        } else if (algoChoice == static_cast<int>(HTSPIndex::AStar)) {
             tt.start();
             d2 = Astar(s, t, Neighbor);
             tt.stop();
@@ -3142,15 +3198,15 @@ void Graph::EffiCheck(string filename, int runtimes) {
 //        if(PartiTag[ID1].first!=PartiTag[ID2].first){
 //            cout<<"Different Partition: "<<PartiTag[ID1].first<<" "<<PartiTag[ID2].first<<endl;
 //        }
-        if (algoChoice == 1) {
+        if (algoChoice == Index_MHL) {
             tt.start();
             d1 = QueryNP(ID1, ID2);
             tt.stop();
-        } else if (algoChoice == 2) {
+        } else if (algoChoice == Index_PH2H) {
             tt.start();
             d1 = Query(ID1, ID2);
             tt.stop();
-        } else if (algoChoice == 3) {
+        } else if (algoChoice == Index_PMHLNaive) {
             tt.start();
             d1 = QueryPMHL(ID1, ID2);
             tt.stop();
@@ -3159,7 +3215,7 @@ void Graph::EffiCheck(string filename, int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == 4) {
+        } else if (algoChoice == Index_PMHL) {
             tt.start();
             d1 = QueryPMHLOpt(ID1, ID2);
             tt.stop();
@@ -3168,11 +3224,12 @@ void Graph::EffiCheck(string filename, int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == 5) {
+        } else if (algoChoice == Index_PostMHL) {
             tt.start();
             d1 = QueryPostMHL(ID1, ID2);
             tt.stop();
-        } else if (algoChoice == 6) {
+        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             tt.start();
             d1 = QueryVPL(ID1, ID2);
             tt.stop();
@@ -3181,7 +3238,7 @@ void Graph::EffiCheck(string filename, int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == 0) {
+        } else if (algoChoice == static_cast<int>(HTSPIndex::AStar)) {
             tt.start();
             d1 = Astar(ID1, ID2, Neighbor);
 //            d1=Dijkstra(ID1,ID2,Neighbor);

@@ -3,34 +3,52 @@
 
 #include <boost/program_options.hpp>
 
+#define DEFAULT_INDEX DVPLIndex
+#define DEFAULT_PNUM 32
+#define DEFAULT_RNUM 4
+#define DEFAULT_QUERY 4
+#define DEFAULT_PMETHOD "NC"
+#define DEFAULT_UTYPE 0
+#define DEFAULT_BSIZE 100
+#define DEFAULT_BNUM 1
+#define DEFAULT_UINTERVAL 300
+#define DEFAULT_RESPONSETIME 1.0
+#define DEFAULT_QNUM 10000
+#define DEFAULT_THREADNUM 15
+#define DEFAULT_WORKNUM 1
+#define DEFAULT_CACHESIZE 30
+#define DEFAULT_BANDWIDTH 100
+#define DEFAULT_LOWERB 0.1
+#define DEFAULT_UPPERB 2
+#define DEFAULT_PRETASK 0
 namespace po = boost::program_options;
 
-bool validateParameters(const string &algoParti, int algoChoice, int algoQuery, int updateType, int preTask);
+HTSPIndex validateAndConvertHTSPIndex(int inputIndex);
+string getHTSPIndexName(HTSPIndex index);
+bool validateParameters(const string &algoParti, int algoQuery, int updateType, int preTask);
 
 int main(int argc, char **argv) {
     string DesFile = "./data/";
     string dataset = "NY";
-    int algoChoice = 5;
-    int partitionNum = 20;
-    int algoQuery = 4;
-    string algoParti = "NC";
-    int updateType = 0;
-    int runtimes = 10000;
-//    runtimes = 1000;
-    int batchNum = 10;
-    batchNum = 2;
-    int batchSize = 10;
-    int batchInterval = 60;
-//    bool ifBatch = false;
-    int threadNum = 15;
-    int preTask = 0;
-    int regionNum = 4;
-    int bandwidth = 50;
-    double lowerB = 0.1;
-    double upperB = 2;
-    double T_r = 0.5;//average query response time, s
-    int workerNum = 15;
-    int cacheListSize = 30;
+    HTSPIndex systemIndex = HTSPIndex::DVPL;
+    int algoChoice = static_cast<int>(systemIndex);
+    int partitionNum = DEFAULT_PNUM;
+    int algoQuery = DEFAULT_QUERY;
+    string algoParti = DEFAULT_PMETHOD;
+    int updateType = DEFAULT_UTYPE;
+    int runtimes = DEFAULT_QNUM;
+    int batchNum = DEFAULT_BNUM;
+    int batchSize = DEFAULT_BSIZE;
+    int batchInterval = DEFAULT_UINTERVAL;
+    int threadNum = DEFAULT_THREADNUM;
+    int preTask = DEFAULT_PRETASK;
+    int regionNum = DEFAULT_RNUM;
+    int bandwidth = DEFAULT_BANDWIDTH;
+    double lowerB = DEFAULT_LOWERB;
+    double upperB = DEFAULT_UPPERB;
+    double T_r = DEFAULT_RESPONSETIME;//average query response time, s
+    int workerNum = DEFAULT_WORKNUM;
+    int cacheListSize = DEFAULT_CACHESIZE;
 
     try {
         // ===================== 1. Define Parameter Options (Original Logic) =====================
@@ -40,28 +58,34 @@ int main(int argc, char **argv) {
                 ("source_path,s", po::value<string>()->required(),
                  "Source path (required), e.g. /export/project/xzhouby")
                 ("dataset,d", po::value<string>()->required(), "Name of dataset (required), e.g. NY")
-                ("index,i", po::value<int>()->required(), "HTSP system index (required): 5=PostMHL, 6=DVPL")
+                ("index,i", po::value<int>()->required(),
+                 "HTSP system index (required):\n"
+                 "  5 = POSTMHL\n"
+                 "  6 = DVPL\n"
+                 "  7 = DVPLwoR\n"
+                 "  8 = DVPLwoV\n"
+                 "  9 = DVPLwoO")
 
                 // Optional parameters (with original default values & variable names)
-                ("response_time,r", po::value<double>()->default_value(0.5),
-                 "Average query response time requirement (seconds), default: 0.5")
-                ("partition_num,p", po::value<int>()->default_value(20), "Partition number, default: 20")
-                ("partition_method,m", po::value<string>()->default_value("NC"),
+                ("response_time,r", po::value<double>()->default_value(DEFAULT_RESPONSETIME),
+                 "Average query response time requirement (seconds), default: 1.0")
+                ("partition_num,p", po::value<int>()->default_value(DEFAULT_PNUM), "Partition number, default: 32")
+                ("partition_method,m", po::value<string>()->default_value(DEFAULT_PMETHOD),
                  "Partition method (NC: PUNCH; MT: METIS), default: NC")
-                ("query_strategy,q", po::value<int>()->default_value(4),
+                ("query_strategy,q", po::value<int>()->default_value(DEFAULT_QUERY),
                  "Query strategy (0:A*; 1: PCH; 2: No-boundary; 3: Post-boundary; 4: Cross-boundary), default: 4")
-                ("update_type,u", po::value<int>()->default_value(0),
+                ("update_type,u", po::value<int>()->default_value(DEFAULT_UTYPE),
                  "Update type (0: No Update Test; 1: Decrease; 2: Increase), default: 0")
-                ("batch_num,b", po::value<int>()->default_value(10), "Batch number, default: 10")
-                ("cache_list_size,c", po::value<int>()->default_value(30), "Cache list number, default: 30")
-                ("batch_interval,I", po::value<int>()->default_value(300), "Batch interval (seconds), default: 300")
-                ("thread_num,T", po::value<int>()->default_value(15), "Thread number, default: 15")
-                ("worker_num,W", po::value<int>()->default_value(1), "Query worker number, default: 1")
-                ("region_num,R", po::value<int>()->default_value(4), "Region number for VPL, default: 4")
-                ("bandwidth,B", po::value<int>()->default_value(50), "Bandwidth, default: 50")
-                ("lower_bound_ratio,L", po::value<double>()->default_value(0.1), "Lower bound ratio, default: 0.1")
-                ("upper_bound_ratio,U", po::value<double>()->default_value(2), "Upper bound ratio, default: 2")
-                ("preprocessing_task,P", po::value<int>()->default_value(0),
+                ("batch_num,b", po::value<int>()->default_value(DEFAULT_BNUM), "Batch number, default: 10")
+                ("cache_list_size,c", po::value<int>()->default_value(DEFAULT_CACHESIZE), "Cache list number, default: 30")
+                ("batch_interval,I", po::value<int>()->default_value(DEFAULT_UINTERVAL), "Batch interval (seconds), default: 300")
+                ("thread_num,T", po::value<int>()->default_value(DEFAULT_THREADNUM), "Thread number, default: 15")
+                ("worker_num,W", po::value<int>()->default_value(DEFAULT_WORKNUM), "Query worker number, default: 1")
+                ("region_num,R", po::value<int>()->default_value(DEFAULT_RNUM), "Region number for VPL, default: 4")
+                ("bandwidth,B", po::value<int>()->default_value(DEFAULT_BANDWIDTH), "Bandwidth, default: 100")
+                ("lower_bound_ratio,L", po::value<double>()->default_value(DEFAULT_LOWERB), "Lower bound ratio, default: 0.1")
+                ("upper_bound_ratio,U", po::value<double>()->default_value(DEFAULT_UPPERB), "Upper bound ratio, default: 2")
+                ("preprocessing_task,P", po::value<int>()->default_value(DEFAULT_PRETASK),
                  "Preprocessing task (1: Tree height-aware PSP Ordering; 2: Partitioned Query Generation), default: 0")
 
                 // Help information
@@ -85,7 +109,7 @@ int main(int argc, char **argv) {
         DesFile = vm["source_path"].as<string>();       // Original: DesFile (source path)
         dataset = vm["dataset"].as<string>();           // Original: dataset
         algoChoice = vm["index"].as<int>();           // Original: algoChoice (HTSP index)
-
+        systemIndex = validateAndConvertHTSPIndex(algoChoice);
         // Optional parameters (strictly original variable names)
         T_r = vm["response_time"].as<double>();         // Original: T_r (response time)
         partitionNum = vm["partition_num"].as<int>();      // Original: partitionNum
@@ -99,12 +123,12 @@ int main(int argc, char **argv) {
         workerNum = vm["worker_num"].as<int>();            // Original: workerNum
         regionNum = vm["region_num"].as<int>();            // Original: regionNum
         bandwidth = vm["bandwidth"].as<int>();             // Original: bandwidth
-        lowerB = vm["lower_bound_ratio"].as<double>();  // Original: lowerB
-        upperB = vm["upper_bound_ratio"].as<double>();  // Original: upperB
-        preTask = vm["preprocessing_task"].as<int>();      // Original: preTask
+        lowerB = vm["lower_bound_ratio"].as<double>();
+        upperB = vm["upper_bound_ratio"].as<double>();
+        preTask = vm["preprocessing_task"].as<int>();
 
         // ===================== 4. Validate Parameter Legality =====================
-        if (!validateParameters(algoParti, algoChoice, algoQuery, updateType, preTask)) {
+        if (!validateParameters(algoParti, algoQuery, updateType, preTask)) {
             return 1;
         }
 
@@ -127,11 +151,6 @@ int main(int argc, char **argv) {
         cout << "argv[16] (Lower Bound Ratio): " << lowerB << endl;
         cout << "argv[17] (Upper Bound Ratio): " << upperB << endl;
         cout << "argv[18] (Preprocessing Task): " << preTask << endl;
-
-        // ===================== 6. Business Logic (Replace with Your Code) =====================
-
-
-
     } catch (const po::required_option &e) {
         // Missing required parameters
         cerr << "Error: Missing required parameter!" << endl;
@@ -161,8 +180,8 @@ int main(int argc, char **argv) {
     g.sourcePath = sourcePath;
     g.ifParallel = true;
     g.dataset = dataset;
-    g.algoChoice = algoChoice;
     g.algoQuery = algoQuery;
+    g.algoChoice = algoChoice;
     g.algoUpdate = algoQuery;
     g.algoParti = algoParti;
     g.partiNum = partitionNum;
@@ -172,7 +191,7 @@ int main(int argc, char **argv) {
 //    g.samePartiPortion=portion;
     g.lambdaCacheSize = cacheListSize;
     cout << "Dataset: " << dataset << endl;
-    cout << "System Index: " << algoChoice << endl;
+    cout << "System Index: " << getHTSPIndexName(systemIndex) << endl;
     if (g.algoQuery == Dijk) {
         cout << "Dijkstra's test !!!!!!!" << endl;
     } else if (g.algoQuery == PH2H_No) {
@@ -202,8 +221,8 @@ int main(int argc, char **argv) {
     if (preTask == 1) {
 //        g.PH2HVertexOrdering(0);//MDE ordering
 //        g.PH2HVertexOrdering(1);//Boundary-first ordering
-//        g.PH2HVertexOrdering(2);//Boundary-first MDE ordering
-        g.PH2HVertexOrdering(3);//Boundary-first heuristic ordering
+//        g.PH2HVertexOrdering(2);//Naive Boundary-first MDE ordering
+        g.PH2HVertexOrdering(3);//Tree height-aware PSP ordering
     } else if (preTask == 2) {
         g.QueryGenerationParti(true);//same partition and real-world simulation
     }
@@ -241,15 +260,8 @@ int main(int argc, char **argv) {
 }
 
 // ===================== Core Parameter Validation Function (Original Variable Names) =====================
-bool validateParameters(const string &algoParti, int algoChoice,
-                        int algoQuery, int updateType, int preTask) {
+bool validateParameters(const string &algoParti, int algoQuery, int updateType, int preTask) {
     bool isValid = true;
-
-    // Validate HTSP system index (5/6)
-    if (algoChoice != 5 && algoChoice != 6) {
-        cerr << "Error: HTSP system index must be 5 (PostMHL) or 6 (DVPL)! Input value: " << algoChoice << endl;
-        isValid = false;
-    }
 
     // Validate partition method (NC/MT)
     if (algoParti != "NC" && algoParti != "MT") {
@@ -276,4 +288,42 @@ bool validateParameters(const string &algoParti, int algoChoice,
     }
 
     return isValid;
+}
+
+HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
+    // Check if input is in the range of legal enum values
+    switch (inputIndex) {
+        case static_cast<int>(HTSPIndex::PostMHL):
+            return HTSPIndex::PostMHL;
+        case static_cast<int>(HTSPIndex::DVPL):
+            return HTSPIndex::DVPL;
+        case static_cast<int>(HTSPIndex::DVPLwoR):
+            return HTSPIndex::DVPLwoR;
+        case static_cast<int>(HTSPIndex::DVPLwoV):
+            return HTSPIndex::DVPLwoV;
+        case static_cast<int>(HTSPIndex::DVPLwoO):
+            return HTSPIndex::DVPLwoO;
+        default:
+            // Throw clear error (includes all legal values for user reference)
+            throw invalid_argument(
+                    "Invalid HTSP system index: " + to_string(inputIndex) +
+                    "\nLegal values are:\n"
+                    "  5 = PostMHL\n"
+                    "  6 = DVPL\n"
+                    "  7 = DVPLwoR\n"
+                    "  8 = DVPLwoV\n"
+                    "  9 = DVPLwoO"
+            );
+    }
+}
+
+string getHTSPIndexName(HTSPIndex index) {
+    switch (index) {
+        case HTSPIndex::PostMHL: return "PostMHL";
+        case HTSPIndex::DVPL: return "DVPL";
+        case HTSPIndex::DVPLwoR: return "DVPLwoR";
+        case HTSPIndex::DVPLwoV: return "DVPLwoV";
+        case HTSPIndex::DVPLwoO: return "DVPLwoO";
+        default: return "UNKNOWN"; // Should never reach here (due to validation)
+    }
 }

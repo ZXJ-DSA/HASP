@@ -568,7 +568,7 @@ void RTREE_QUAL::Remove(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMD
 
 
 RTREE_TEMPLATE
-intRTREE_QUAL::Search(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS],
+int RTREE_QUAL::Search(const ELEMTYPE a_min[NUMDIMS], const ELEMTYPE a_max[NUMDIMS],
                       std::function<bool(const DATATYPE &)> callback, std::vector<int> &res) const {
 #ifdef _DEBUG
     for(int index=0; index<NUMDIMS; ++index)
@@ -1605,7 +1605,7 @@ void RTREE_QUAL::ReInsert(Node *a_node, ListNode **a_listNode) {
 
 // Search in an index tree or subtree for all data rectangles that overlap the argument rectangle. a_rect is the target rectangle
 RTREE_TEMPLATE
-boolRTREE_QUAL::Search(Node *a_node, Rect *a_rect, int &a_foundCount, std::function<bool(const DATATYPE &)> callback,
+bool RTREE_QUAL::Search(Node *a_node, Rect *a_rect, int &a_foundCount, std::function<bool(const DATATYPE &)> callback,
                        std::vector<int> &res) const {
             RTREE_ASSERT(a_node);
             RTREE_ASSERT(a_node->m_level >= 0);
