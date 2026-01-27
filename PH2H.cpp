@@ -58,6 +58,7 @@ void Graph::IndexConstruction() {
             cout << "System Index: DVPLwoR index." << endl;
             string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
                                "/vertex_orderMDEGreedy";
+
             VPLIndexConstruct(orderFile);
             break;
         }
@@ -3267,7 +3268,9 @@ void Graph::EffiCheck(string filename, int runtimes) {
         }
 
     }
-    if (algoChoice == 3 || algoChoice == 6) {
+    if (algoChoice == Index_PMHLNaive || algoChoice == Index_PMHL || algoChoice == Index_DVPL ||
+        algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
+        algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         cout << "Same-partition query number: " << sameNum << " ; Cross-partition query number: " << crossNum << endl;
     }
 
@@ -3298,7 +3301,7 @@ Graph::EffiCheckStages(vector<pair<int, int>> &ODpair, int runtimes, int interva
     clock_t start = clock();
     vector<int> results(runtimes, -1);
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         runT1 = EffiMHLStage(ODpair, 1000, Dijk, qTime1);
         runT2 = EffiMHLStage(ODpair, runtimes / 10, CH, qTime2);
         runT3 = EffiMHLStage(ODpair, runtimes, H2H, qTime3);
@@ -3341,7 +3344,7 @@ Graph::EffiCheckStages(vector<pair<int, int>> &ODpair, int runtimes, int interva
         stageQueryT[Dijk] += runT1;
         stageQueryT[CH] += runT2;
         stageQueryT[H2H] += runT3;
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHL || algoChoice == Index_PMHLNaive) {
         runT1 = EffiPMHLStage(ODpair, 1000, Dijk, qTime1);
         runT2 = EffiPMHLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT3 = EffiPMHLStage(ODpair, runtimes, PH2H_No, qTime3);
@@ -3411,7 +3414,7 @@ Graph::EffiCheckStages(vector<pair<int, int>> &ODpair, int runtimes, int interva
         stageQueryT[PH2H_No] += runT3;
         stageQueryT[PH2H_Post] += runT4;
         stageQueryT[PH2H_Cross] += runT5;
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         runT1 = EffiPostMHLStage(ODpair, 1000, Dijk, qTime1);
         runT2 = EffiPostMHLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, qTime4);
@@ -3467,7 +3470,8 @@ Graph::EffiCheckStages(vector<pair<int, int>> &ODpair, int runtimes, int interva
         stageQueryT[PCH_No] += runT2;
         stageQueryT[PH2H_Post] += runT4;
         stageQueryT[PH2H_Cross] += runT5;
-    } else if (algoChoice == 6) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, 1000, Dijk, qTime1);
         runT2 = EffiVPLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT4 = EffiVPLStage(ODpair, runtimes, PH2H_Post, qTime4);
@@ -3535,7 +3539,7 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
     vector<double> durations(5, 0);
     double updateT = 0;//overall update time
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         //Stage 1: Dijkstra
         updateT = stageDurations[Dijk];
         if (updateT < intervalT) {
@@ -3556,7 +3560,7 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
 //        stageUpdateT[Dijk]+=stageDurations[Dijk];
 //        stageUpdateT[CH]+=stageDurations[CH];
 //        stageUpdateT[H2H]+=stageDurations[H2H];
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHLNaive || algoChoice == Index_PMHL) {
         //Stage 1: Dijkstra
         updateT = stageDurations[Dijk];
         if (updateT < intervalT) {
@@ -3589,13 +3593,7 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
         } else {
             durations[Dijk] = intervalT;
         }
-
-//        stageUpdateT[Dijk]+=stageDurations[Dijk];
-//        stageUpdateT[PCH_No]+=stageDurations[PCH_No];
-//        stageUpdateT[PH2H_No]+=stageDurations[PH2H_No];
-//        stageUpdateT[PH2H_Post]+=stageDurations[PH2H_Post];
-//        stageUpdateT[PH2H_Cross]+=stageDurations[PH2H_Cross];
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         //Stage 1: Dijkstra
         updateT = stageDurations[Dijk];
         if (updateT < intervalT) {
@@ -3620,12 +3618,8 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
         } else {
             durations[Dijk] = intervalT;
         }
-
-//        stageUpdateT[Dijk]+=stageDurations[Dijk];
-//        stageUpdateT[PCH_No]+=stageDurations[PCH_No];
-//        stageUpdateT[PH2H_Post]+=stageDurations[PH2H_Post];
-//        stageUpdateT[PH2H_Cross]+=stageDurations[PH2H_Cross];
-    } else if (algoChoice == 6) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         //Stage 1: Dijkstra
         updateT = stageDurations[Dijk];
         if (updateT < intervalT) {
@@ -3650,11 +3644,6 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
         } else {
             durations[Dijk] = intervalT;
         }
-
-//        stageUpdateT[Dijk]+=stageDurations[Dijk];
-//        stageUpdateT[PCH_No]+=stageDurations[PCH_No];
-//        stageUpdateT[PH2H_Post]+=stageDurations[PH2H_Post];
-//        stageUpdateT[PH2H_Cross]+=stageDurations[PH2H_Cross];
     } else {
         cout << "Wrong query type! " << algoChoice << endl;
         exit(1);
@@ -3703,15 +3692,7 @@ void Graph::StageDurationComputeSchedule(int intervalT, vector<vector<double>> &
             durations[i][Dijk] = intervalT;
         }
     }
-
-
-//        stageUpdateT[Dijk]+=stageDurations[Dijk];
-//        stageUpdateT[PCH_No]+=stageDurations[PCH_No];
-//        stageUpdateT[PH2H_Post]+=stageDurations[PH2H_Post];
-//        stageUpdateT[PH2H_Cross]+=stageDurations[PH2H_Cross];
-
 }
-
 
 //function for efficiency test
 void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<double> &queryTimes) {
@@ -3734,14 +3715,14 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
     clock_t start = clock();
     vector<int> results(runtimes, -1);
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         runT1 = EffiMHLStage(ODpair, runtimes / 100, Dijk, qTime1);
         runT2 = EffiMHLStage(ODpair, runtimes / 10, CH, qTime2);
         runT3 = EffiMHLStage(ODpair, runtimes, H2H, qTime3);
         queryTimes[Dijk] = runT1;
         queryTimes[CH] = runT2;
         queryTimes[H2H] = runT3;
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHLNaive || algoChoice == Index_PMHL) {
         runT1 = EffiPMHLStage(ODpair, runtimes / 100, Dijk, qTime1);
         runT2 = EffiPMHLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT3 = EffiPMHLStage(ODpair, runtimes, PH2H_No, qTime3);
@@ -3752,7 +3733,7 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
         queryTimes[PH2H_No] = runT3;
         queryTimes[PH2H_Post] = runT4;
         queryTimes[PH2H_Cross] = runT5;
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         runT1 = EffiPostMHLStage(ODpair, runtimes / 100, Dijk, qTime1);
         runT2 = EffiPostMHLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, qTime4);
@@ -3786,34 +3767,23 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes,
     clock_t start = clock();
     vector<int> results(runtimes, -1);
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         runT1 = EffiMHLStage(ODpair, runtimes / 100, Dijk, queryTimes[Dijk]);
         runT2 = EffiMHLStage(ODpair, runtimes / 10, CH, queryTimes[CH]);
         runT5 = EffiMHLStage(ODpair, runtimes, H2H, queryTimes[H2H]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[CH]=runT2;
-//        aveQT[H2H]=runT5;
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHL || algoChoice == Index_PMHLNaive) {
         runT1 = EffiPMHLStage(ODpair, runtimes / 100, Dijk, queryTimes[Dijk]);
         runT2 = EffiPMHLStage(ODpair, runtimes / 10, PCH_No, queryTimes[PCH_No]);
         runT3 = EffiPMHLStage(ODpair, runtimes, PH2H_No, queryTimes[PH2H_No]);
         runT4 = EffiPMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PH2H_No]=runT3;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         runT1 = EffiPostMHLStage(ODpair, runtimes / 100, Dijk, queryTimes[Dijk]);
         runT2 = EffiPostMHLStage(ODpair, runtimes / 10, PCH_No, queryTimes[PCH_No]);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPostMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
-    } else if (algoChoice == 6) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, runtimes / 100, Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, runtimes / 10, PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -3822,13 +3792,6 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes,
                 runT5 = EffiVPLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
             }
         }
-
-
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PCH_Hybrid]=runT3;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
     } else {
         cout << "Wrong query type! " << algoChoice << endl;
         exit(1);
@@ -3856,14 +3819,14 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
     clock_t start = clock();
     vector<int> results(runtimes, -1);
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         runT1 = EffiMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiMHLStage(ODpair, min(runtimes, 1000), CH, queryTimes[CH]);
         runT5 = EffiMHLStage(ODpair, runtimes, H2H, queryTimes[H2H]);
         aveQT[Dijk] = runT1;
         aveQT[CH] = runT2;
         aveQT[H2H] = runT5;
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHLNaive || algoChoice == Index_PMHL) {
         runT1 = EffiPMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiPMHLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         runT3 = EffiPMHLStage(ODpair, runtimes, PH2H_No, queryTimes[PH2H_No]);
@@ -3874,7 +3837,7 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
         aveQT[PH2H_No] = runT3;
         aveQT[PH2H_Post] = runT4;
         aveQT[PH2H_Cross] = runT5;
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         runT1 = EffiPostMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiPostMHLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
@@ -3883,7 +3846,8 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
         aveQT[PCH_No] = runT2;
         aveQT[PH2H_Post] = runT4;
         aveQT[PH2H_Cross] = runT5;
-    } else if (algoChoice == 6) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+        algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -3903,7 +3867,6 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
     }
     tt.stop();
     cout << "Time for efficiency test: " << tt.GetRuntime() << " s." << endl;
-//    return runT5;
 }
 
 //function for efficiency test
@@ -3927,34 +3890,23 @@ void Graph::EffiStageCheckReal(vector<pair<int, int>> &ODpair, int runtimes,
     cout << "Efficiency test. Run times: " << runtimes << " (" << ODpair.size() << ")" << endl;
     vector<int> results(runtimes, -1);
 
-    if (algoChoice == 1) {
+    if (algoChoice == Index_MHL) {
         runT1 = EffiMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiMHLStage(ODpair, min(runtimes, 1000), CH, queryTimes[CH]);
         runT5 = EffiMHLStage(ODpair, runtimes, H2H, queryTimes[H2H]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[CH]=runT2;
-//        aveQT[H2H]=runT5;
-    } else if (algoChoice == 3) {
+    } else if (algoChoice == Index_PMHL || algoChoice == Index_PMHLNaive) {
         runT1 = EffiPMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiPMHLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         runT3 = EffiPMHLStage(ODpair, runtimes, PH2H_No, queryTimes[PH2H_No]);
         runT4 = EffiPMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PH2H_No]=runT3;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
-    } else if (algoChoice == 5) {
+    } else if (algoChoice == Index_PostMHL) {
         runT1 = EffiPostMHLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiPostMHLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPostMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
-    } else if (algoChoice == 6) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -3963,19 +3915,12 @@ void Graph::EffiStageCheckReal(vector<pair<int, int>> &ODpair, int runtimes,
                 runT5 = EffiVPLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
             }
         }
-
-//        aveQT[Dijk]=runT1;
-//        aveQT[PCH_No]=runT2;
-//        aveQT[PCH_Hybrid]=runT3;
-//        aveQT[PH2H_Post]=runT4;
-//        aveQT[PH2H_Cross]=runT5;
     } else {
         cout << "Wrong query type! " << algoChoice << endl;
         exit(1);
     }
     tt.stop();
     cout << "Time for efficiency test: " << tt.GetRuntime() << " s." << endl;
-//    return runT5;
 }
 
 double Graph::analytical_update_first(double T_q, double T_u, double T_r, double T,
@@ -4166,7 +4111,6 @@ Graph::simulator_UpdateFirst(vector<vector<double>> &query_cost, vector<vector<d
 //    cout<<"batch number: "<<num_updates<<endl;
     int current_update_index = 0;
 
-
     bool finished = false;
 
     int query_processed_in_one_update_slot = 0;
@@ -4304,9 +4248,6 @@ Graph::simulator_UpdateFirst(vector<vector<double>> &query_cost, vector<vector<d
             current_update_index++;
         }
     }
-
-
-
 
     //cout<<"Avg_response_time " << avg_response_time / count / 1000000 <<endl;
     return make_pair(count * 1.0 / T,
@@ -4764,13 +4705,11 @@ double Graph::ThroughputSimulateRealVPL(vector<pair<int, int>> &ODpair, vector<v
 
     cout << "Throughput: " << throughput << " . Time for throughput simulation: " << tt.GetRuntime() << " s" << endl;
     return throughput;
-
 }
 
 //function for efficiency test
 void Graph::GetBatchThroughput(vector<double> &queryTimes, int intervalT, unsigned long long &throughputNum,
                                vector<double> &stageUpdateT) {
-
     int s, t;
     Timer tt;
 
@@ -5752,7 +5691,11 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
     cout << "query number: " << ODpair.size() << endl;
 //    vector<vector<int>> clusterP;
 //    int clusterNum=4;
-    if (algoChoice == 6) {
+    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
+        if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+            regionNum = 1;
+            cout << "region number of DVPLwoR is set to " << regionNum << endl;
+        }
         PartitionRegionCluster(regionNum, clusterP, ODpair);
     }
 
@@ -5761,11 +5704,11 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
     Timer tRecord;
     double runT1 = 0, runT2 = 0;
     unsigned long long throughputNum = 0;
-    if (algoChoice == 5 || algoChoice == 6) {
+    if (algoChoice == Index_PostMHL || (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO))) {
         ProBeginVertexSetParti.assign(partiNum, vector<int>());
         vertexIDChLParti.assign(partiNum, set<int>());
         ProBeginVertexSetPartiExtend.assign(partiNum, vector<int>());
-        if (algoChoice == 6) {
+        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
             ProBeginVertexSetPartiInc.assign(partiNum, vector<int>());
             ProBeginVertexSetPartiExtendInc.assign(partiNum, vector<int>());
         }
@@ -5858,18 +5801,19 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         batchSizeSum = batchSizeSum + wBatchDec.size() + wBatchInc.size();
         count++;
         int id1 = 2, id2 = 3;
-
+        // index copy, obtaining old index 0
+        // query process by old index 0
 
         updateBatchID = batch_i;
-//            if(false){
-        if (algoChoice == 6) {
+        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
             tt.start();
             cout << "Mix update! Decrease size: " << wBatchDec.size() << " ; Increase size: " << wBatchInc.size()
                  << endl;
 //                VPLBatchUpdateMix(wBatchDec,wBatchInc,i,runT1);
             VPLBatchUpdateMixSchedule(wBatchDec, wBatchInc, batch_i, runT1);
             tt.stop();
-        } else {
+        }
+        else {
             //Step 1: Decrease updates
             tt.start();
             if (!wBatchDec.empty()) {
@@ -5937,9 +5881,9 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
 //            aveDuration[i]+=stageDurations[i];
 //        }
 
-
 //        EffiCheckStages(ODpair,runtimes,batchInterval,throughputNum,stageUpdateT,stageQueryT);
-        if (algoChoice == 6) {
+        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             vector<double> duration = StageDurationCompute(batchInterval);
             double fastQT;
             for (int j = 0; j < duration.size(); ++j) {
@@ -5974,7 +5918,8 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
                                                       batchInterval / clusterP.size(), fastQT,
                                                       workerNum);//2 batches update
             throughputNums.push_back(throughputNum);
-        } else {//other algorithms
+        }
+        else {//other algorithms
             vector<double> duration = StageDurationCompute(batchInterval);
             double fastQT;
             for (int j = 0; j < duration.size(); ++j) {
@@ -6017,7 +5962,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         cout << "Average update time of U-Stage " << i + 1 << " : " << aveDuration[i] / batchNum << " s." << endl;
     }
     for (int i = 0; i < stageQueryT.size(); ++i) {
-        if (algoChoice == 6 || algoChoice == 5) {//
+        if ((algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) || algoChoice == Index_PostMHL) {
             if (i <= PCH_No) {
                 cout << "Average query time of Q-Stage " << i + 1 << " : " << get_mean(stageQueryT[i]) * 1000 << " ms"
                      << endl;
@@ -6032,7 +5977,18 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
     }
 
 //    exit(0);
-    if (algoChoice != 6) {
+    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
+        double aveThr = 0;
+        for (int i = 0; i < throughputNums.size(); ++i) {
+            aveThr += throughputNums[i];
+        }
+        cout << "Average unaffected query number: " << get_mean(unaffectedQNum) << " ; total query number: "
+             << get_mean(totalQNum) << endl;
+        cout << "Batch number: " << batchNum << "(" << count << "). Maximal update time: " << maxUTime
+             << " ; average batch size: " << batchSizeSum / count << endl;
+        cout << "\nPartiNum: " << partiNum << ". Average Throughput: " << aveThr / throughputNums.size()
+             << " ; Average batch update Time: " << updateTime / count << " s." << endl;
+    } else {
         pair<double, double> resultE = ThroughputEstimate(stageQueryT, stageUpdateT, T_r, batchInterval);
         cout << "Estimated throughput: " << resultE.first << " ; fastest available query time: "
              << resultE.second * 1000 << " ms" << endl;
@@ -6046,20 +6002,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
              << " ; average batch size: " << batchSizeSum / count << endl;
         cout << "\nPartiNum: " << partiNum << ". Average Throughput: " << aveThr / throughputNums.size()
              << " ; Average batch update Time: " << updateTime / count << " s" << endl;
-    } else {
-        double aveThr = 0;
-        for (int i = 0; i < throughputNums.size(); ++i) {
-            aveThr += throughputNums[i];
-        }
-        cout << "Average unaffected query number: " << get_mean(unaffectedQNum) << " ; total query number: "
-             << get_mean(totalQNum) << endl;
-        cout << "Batch number: " << batchNum << "(" << count << "). Maximal update time: " << maxUTime
-             << " ; average batch size: " << batchSizeSum / count << endl;
-        cout << "\nPartiNum: " << partiNum << ". Average Throughput: " << aveThr / throughputNums.size()
-             << " ; Average batch update Time: " << updateTime / count << " s." << endl;
     }
-
-
 }
 
 //function of testing the throughput on random updates
@@ -7731,17 +7674,23 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
         int uNum = 0;
 //        VPLInnerUnaffectedPartiDetectByOracle(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,uNum,tDetect,partiAffectInfo[ci]);
 //        VPLShortcutUpdate(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,tSCU);
-        boost::thread_group thread1;
-        thread1.add_thread(new boost::thread(&Graph::VPLInnerUnaffectedPartiDetectByOracle, this,
-                                             boost::ref(partiBatchDecSchedule), boost::ref(partiBatchIncSchedule),
-                                             boost::ref(overlayBatchDecSchedule), boost::ref(overlayBatchIncSchedule),
-                                             boost::ref(uNum), boost::ref(tDetect), boost::ref(partiAffectInfo[ci])));
-        thread1.add_thread(new boost::thread(&Graph::VPLShortcutUpdate, this, boost::ref(partiBatchDecSchedule),
-                                             boost::ref(partiBatchIncSchedule), boost::ref(overlayBatchDecSchedule),
-                                             boost::ref(overlayBatchIncSchedule), boost::ref(tSCU)));
-        thread1.join_all();
-        cout << "Shortcut update time: " << tSCU << " s ; Oracle-based detect time: " << tDetect
-             << " s ; Inner-unaffected partition number by oracle: " << uNum << endl;
+        if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+            boost::thread_group thread1;
+            thread1.add_thread(new boost::thread(&Graph::VPLInnerUnaffectedPartiDetectByOracle, this,
+                                                 boost::ref(partiBatchDecSchedule), boost::ref(partiBatchIncSchedule),
+                                                 boost::ref(overlayBatchDecSchedule), boost::ref(overlayBatchIncSchedule),
+                                                 boost::ref(uNum), boost::ref(tDetect), boost::ref(partiAffectInfo[ci])));
+            thread1.add_thread(new boost::thread(&Graph::VPLShortcutUpdate, this, boost::ref(partiBatchDecSchedule),
+                                                 boost::ref(partiBatchIncSchedule), boost::ref(overlayBatchDecSchedule),
+                                                 boost::ref(overlayBatchIncSchedule), boost::ref(tSCU)));
+            thread1.join_all();
+            cout << "Shortcut update time: " << tSCU << " s ; Oracle-based detect time: " << tDetect
+                 << " s ; Inner-unaffected partition number by oracle: " << uNum << endl;
+        } else {
+            VPLShortcutUpdate(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,tSCU);
+            cout << "Shortcut update time: " << tSCU << " s" << endl;
+        }
+
         tt2.stop();
         algoQuery = PCH_No;
         uStageDurations[PCH_No] += tt2.GetRuntime();
@@ -7780,8 +7729,10 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
 
                 /// Identify the unaffected partitions
                 double tDetect = 0;
-                VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
-                                              partiAffectInfo[ci]);
+                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+                    VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
+                                                  partiAffectInfo[ci]);
+                }
                 MixRepair_PartiIndexVPLPost(true, partiBatchDecSchedule, partiBatchIncSchedule, tPost);//decrease
                 tt2.stop();
                 uStageDurations[PH2H_Post] = uStageDurations[PH2H_Post] + tt2.GetRuntime();
@@ -7803,9 +7754,10 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
                 }
                 /// Identify the unaffected partitions
                 double tDetect = 0;
-                VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
-                                              partiAffectInfo[ci]);
-//            if(true){
+                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+                    VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
+                                                  partiAffectInfo[ci]);
+                }
                 if (threadnum <= affectedParti.size() && threadnum <= affectedPartiInc.size()) {
 //                cout<<"No enough thread for parallelization between post-boundary and cross-boundary."<<endl;
                     tt2.start();
@@ -7859,9 +7811,7 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
         tt3.stop();
 //        CorrectnessCheck(10);
 //        cout<<"Update time for partition "<<*it<<" : "<<tt3.GetRuntime()<<" s."<<endl;
-
     }
-
 //    runT1+=tt.GetRuntime();
 //    runT1=runT1+stageDurations[Dijk]+stageDurations[PCH_No]+stageDurations[PH2H_Post];
 //    cout<<"Batch "<<batch_i<<". Update time: "<<stageDurations[Dijk]+stageDurations[PCH_No]+stageDurations[PH2H_Post]<<" s; "<<tt.GetRuntime()<<" s."<<endl;

@@ -356,18 +356,10 @@ public:
     std::vector<query> generate_queryList(double lambda, int T) {
         std::vector<query> list;
         std::vector<double> sequence = poisson(lambda, T);
-//        std::cout<<"sequence size of poisson process: "<<sequence.size()<<" ; lambda: "<<lambda<<" ; T: "<<T<<std::endl;
-//    std::cout<<"process_time_list size: "<<process_time_list.size()<<std::endl;
-//    int m = process_time_list.size();
         int n = sequence.size();
         for (int i = 0; i < n; i++) {
             int id = rand() % n;
-//        query query(sequence[i], process_time_list[i%m]);
-//        list.push_back(query);
             list.emplace_back(sequence[i], 0);
-//            if(i<2 || i>n-2){
-//                std::cout<<i<<": "<<id<<" "<<sequence[i]<<" s"<<std::endl;
-//            }
         }
         return list;
     }

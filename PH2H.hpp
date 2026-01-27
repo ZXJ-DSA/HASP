@@ -15600,7 +15600,8 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
             temp.emplace_back(i);
         }
         cluster1.emplace_back(temp);
-    } else {
+    }
+    else {
         vector<unordered_map<int, int>> SketchGraphQuery(partiNum, unordered_map<int, int>());
         /// Step 1: Build a query-aware graph among all partitions
         for (int i = 0; i < ODpair.size(); ++i) {
@@ -15728,7 +15729,6 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
             aveSize += cluster1[i].size();
         }
     }
-
 
     tt.stop();
     cout << "cluster number: " << clusterP.size() << " ; average size: " << aveSize / clusterP.size() << " ; time: "

@@ -3,7 +3,7 @@
 #define HEAD_H_
 
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include <vector>
 #include <map>
 #include <set>
@@ -20,6 +20,7 @@
 #include <string>
 #include <algorithm>
 #include <stdexcept>
+#include <random>
 #include "RTree.h"
 #include "Heap.h"
 //#include "labeling.hpp"
@@ -1608,8 +1609,23 @@ public:
     void getThroughputEvolveData(string filename);
 
 
+//    float nextTime(double rateParameter) {
+//        return -log(1.0f - (double) rand() / (RAND_MAX + 1.0)) / rateParameter;
+//    }
     float nextTime(double rateParameter) {
-        return -log(1.0f - (double) rand() / (RAND_MAX + 1.0)) / rateParameter;
+        // 静态变量：避免每次调用重新初始化，提升效率且保证随机性
+        static std::random_device rd;                // 真随机数设备（优先调用系统真随机源）
+        static std::mt19937 gen(rd());               // 梅森旋转引擎，用真随机种子初始化
+        static std::uniform_real_distribution<double> dist(0.0, 1.0);  // 生成[0.0, 1.0)的均匀随机数
+
+        // 生成(0,1)区间的随机数，排除0和1（避免log(0)或log(1)导致异常）
+        double u;
+        do {
+            u = dist(gen);
+        } while (u <= 0.0 || u >= 1.0);
+
+        // 指数分布逆变换采样（逻辑与原代码一致，仅替换随机数源）
+        return -std::log(1.0 - u) / rateParameter;
     }
 
 /// poisson process
@@ -1634,18 +1650,9 @@ public:
     std::vector<query> generate_queryList(double lambda, int T) {
         std::vector<query> list;
         std::vector<double> sequence = poisson(lambda, T);
-//        std::cout<<"sequence size of poisson process: "<<sequence.size()<<" ; lambda: "<<lambda<<" ; T: "<<T<<std::endl;
-//    std::cout<<"process_time_list size: "<<process_time_list.size()<<std::endl;
-//    int m = process_time_list.size();
         int n = sequence.size();
         for (int i = 0; i < n; i++) {
-            int id = rand() % n;
-//        query query(sequence[i], process_time_list[i%m]);
-//        list.push_back(query);
             list.emplace_back(sequence[i], 0);
-//            if(i<2 || i>n-2){
-//                std::cout<<i<<": "<<id<<" "<<sequence[i]<<" s"<<std::endl;
-//            }
         }
         return list;
     }
