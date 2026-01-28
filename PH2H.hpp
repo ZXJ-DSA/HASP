@@ -9487,9 +9487,7 @@ int Graph::QueryPMHLOpt(int ID1, int ID2) {
                 dis = QueryPartiPartiExtLCA(ID1, ID2);
             }
         }
-
     }
-
     return dis;
 }
 
@@ -15615,7 +15613,6 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
                     SketchGraphQuery[pid1][pid2] += 1;
                     SketchGraphQuery[pid2][pid1] += 1;
                 }
-
             }
         }
 

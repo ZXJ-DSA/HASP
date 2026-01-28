@@ -60,12 +60,12 @@ int main(int argc, char **argv) {
                 ("dataset,d", po::value<string>()->required(), "Name of dataset (required), e.g. NY")
                 ("index,i", po::value<int>()->required(),
                  "HTSP system index (required):\n"
-                 "  5 = POSTMHL\n"
+                 "  5 = PostMHL\n"
                  "  6 = DVPL\n"
                  "  7 = DVPLwoR\n"
                  "  8 = DVPLwoV\n"
-                 "  9 = DVPLwoO")
-
+                 "  9 = DVPLwoO\n"
+                 "  10 = MVCC_PostMHL")
                 // Optional parameters (with original default values & variable names)
                 ("response_time,r", po::value<double>()->default_value(DEFAULT_RESPONSETIME),
                  "Average query response time requirement (seconds), default: 1.0")
@@ -169,11 +169,9 @@ int main(int argc, char **argv) {
     //used for running time calculation
     Timer tt0;
     tt0.start();
-
     string sourcePath = DesFile + "/" + dataset;
     string ODfile = sourcePath + "/" + dataset + ".query";
     string updateFile = sourcePath + "/" + dataset + ".update";
-
 
     Graph g;
     g.threadnum = threadNum;//thread number of parallel computation (can be changed)
@@ -229,9 +227,7 @@ int main(int argc, char **argv) {
 
 //    g.ReadGraph(graphfile);//
 //    g.StainingMethod(0);
-
 //    g.getThroughputEvolveData("/Users/zhouxj/Documents/1-Research/1-Papers/0-My_Papers/5-HASP/result/log_exp5_1");
-
     ///Task 1: Index construction
     g.IndexConstruction();
 //    g.PH2HIndexConstruct();
@@ -303,6 +299,8 @@ HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
             return HTSPIndex::DVPLwoV;
         case static_cast<int>(HTSPIndex::DVPLwoO):
             return HTSPIndex::DVPLwoO;
+        case static_cast<int>(HTSPIndex::MVCC_PostMHL):
+            return HTSPIndex::MVCC_PostMHL;
         default:
             // Throw clear error (includes all legal values for user reference)
             throw invalid_argument(

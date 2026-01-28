@@ -300,7 +300,8 @@ enum class HTSPIndex {
     DVPL = 6,       // DVPL Index
     DVPLwoR = 7,    // DVPL without Rotation update schedule
     DVPLwoV = 8,    // DVPL without index Validation
-    DVPLwoO = 9     // DVPL without tree height-aware ordering
+    DVPLwoO = 9,     // DVPL without tree height-aware ordering
+    MVCC_PostMHL = 10   // MVCC + PostMHL
 };
 
 class Graph {
@@ -517,6 +518,10 @@ public:
                                   int simulation_time, double threshold_time, double period_time, double queryTime,
                                   int workerNum);
 
+    double ThroughputSimulateRealMVCC(vector<vector<double>> &query_costs, vector<vector<double>> &update_costs,
+                                  int simulation_time, double threshold_time, double period_time, double queryTime,
+                                  int workerNum);
+
     double ThroughputSimulateRealVPL(vector<pair<int, int>> &ODpair, vector<vector<double>> &query_costs,
                                      vector<vector<double>> &update_costs, int simulation_time, double threshold_time,
                                      double period_time, double queryTime, int workerNum);
@@ -527,6 +532,10 @@ public:
 
     pair<double, double>
     simulator_UpdateFirst(vector<vector<double>> &query_costs, vector<vector<double>> &update_costs,
+                          vector<query> &queryList, int T, double period_time, int workerNum);
+
+    pair<double, double>
+    simulator_UpdateFirstMVCC(vector<vector<double>> &query_costs, vector<vector<double>> &update_costs,
                           vector<query> &queryList, int T, double period_time, int workerNum);
 
     pair<double, double> simulator_UpdateFirstVPL(vector<pair<int, int>> &ODpair, vector<vector<double>> &query_cost,
