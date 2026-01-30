@@ -68,15 +68,15 @@ void Graph::IndexConstruction() {
             VPLIndexConstruct(orderFile);
             break;
         }
-        case HTSPIndex::DVPLwoV: {
-            cout << "System Index: DVPLwoV index." << endl;
+        case HTSPIndex::DVPLwoRV: {
+            cout << "System Index: DVPLwoRV index." << endl;
             string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
                                "/vertex_orderMDEGreedy";
             VPLIndexConstruct(orderFile);
             break;
         }
-        case HTSPIndex::DVPLwoO: {
-            cout << "System Index: DVPLwoO index." << endl;
+        case HTSPIndex::DVPLwoRVO: {
+            cout << "System Index: DVPLwoRVO index." << endl;
             string orderFile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
                                "/vertex_orderMDE2";
             VPLIndexConstruct(orderFile);
@@ -583,9 +583,9 @@ void Graph::PMHLIndexConstruct() {
 
     /// Read order and partitions
     string orderfile;
-//    orderfile=sourcePath+"/partitions/"+dataset+"_"+algoParti+"_"+to_string(partiNum)+"/vertex_orderMDE2";
-    orderfile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
-                "/vertex_orderMDEGreedy";
+    orderfile=sourcePath+"/partitions/"+dataset+"_"+algoParti+"_"+to_string(partiNum)+"/vertex_orderMDE2";
+//    orderfile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum) +
+//                "/vertex_orderMDEGreedy";
     ReadOrder(orderfile);
 
     string partitionfile = sourcePath + "/partitions/" + dataset + "_" + algoParti + "_" + to_string(partiNum);
@@ -672,10 +672,10 @@ void Graph::VPLIndexConstruct(string& orderFile) {
     if (!inFile) { // if not exist
         cout << "Fail to open file" << orderFile << endl;
         inFile.close();
-        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
+        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) ||
             algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             PH2HVertexOrdering(3); // Tree height-aware PSP ordering
-        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == Index_PMHL ||
+        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) || algoChoice == Index_PMHL ||
             algoChoice == Index_PMHLNaive) {
             PH2HVertexOrdering(2); // Naive boundary-first PSP ordering
         }
@@ -2131,7 +2131,6 @@ void Graph::OverlayOrderingBoundaryFirstMDEGreedy() {
         }
     }
 
-
 //    vector<bool> exist; exist.assign(node_num,true);
     vector<bool> change;
     change.assign(node_num, false);
@@ -2894,7 +2893,7 @@ void Graph::CorrectnessCheck(int runtimes) {
             tt.start();
             d2 = QueryPostMHL(s, t);
             tt.stop();
-        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
             algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             tt.start();
             d2 = QueryVPL_HASP(s, t);
@@ -2905,7 +2904,7 @@ void Graph::CorrectnessCheck(int runtimes) {
             } else {
                 crossNum++;
             }
-        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoV)) {
+        } else if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV)) {
             tt.start();
             d2=QueryVPL(s,t);
             tt.stop();
@@ -3232,8 +3231,8 @@ void Graph::EffiCheck(string filename, int runtimes) {
             tt.start();
             d1 = QueryPostMHL(ID1, ID2);
             tt.stop();
-        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
-            algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+        } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             tt.start();
             d1 = QueryVPL(ID1, ID2);
             tt.stop();
@@ -3272,7 +3271,7 @@ void Graph::EffiCheck(string filename, int runtimes) {
 
     }
     if (algoChoice == Index_PMHLNaive || algoChoice == Index_PMHL || algoChoice == Index_DVPL ||
-        algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) ||
+        algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) ||
         algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         cout << "Same-partition query number: " << sameNum << " ; Cross-partition query number: " << crossNum << endl;
     }
@@ -3473,8 +3472,8 @@ Graph::EffiCheckStages(vector<pair<int, int>> &ODpair, int runtimes, int interva
         stageQueryT[PCH_No] += runT2;
         stageQueryT[PH2H_Post] += runT4;
         stageQueryT[PH2H_Cross] += runT5;
-    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
-               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, 1000, Dijk, qTime1);
         runT2 = EffiVPLStage(ODpair, runtimes / 10, PCH_No, qTime2);
         runT4 = EffiVPLStage(ODpair, runtimes, PH2H_Post, qTime4);
@@ -3621,8 +3620,8 @@ vector<double> Graph::StageDurationCompute(int intervalT) {
         } else {
             durations[Dijk] = intervalT;
         }
-    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
-               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         //Stage 1: Dijkstra
         updateT = stageDurations[Dijk];
         if (updateT < intervalT) {
@@ -3785,8 +3784,8 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes,
         runT2 = EffiPostMHLStage(ODpair, runtimes / 10, PCH_No, queryTimes[PCH_No]);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPostMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
-               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, runtimes / 100, Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, runtimes / 10, PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -3849,8 +3848,8 @@ void Graph::EffiStageCheck(vector<pair<int, int>> &ODpair, int runtimes, vector<
         aveQT[PCH_No] = runT2;
         aveQT[PH2H_Post] = runT4;
         aveQT[PH2H_Cross] = runT5;
-    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
-        algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
+        algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -3908,8 +3907,8 @@ void Graph::EffiStageCheckReal(vector<pair<int, int>> &ODpair, int runtimes,
         runT2 = EffiPostMHLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         runT4 = EffiPostMHLStage(ODpair, runtimes, PH2H_Post, queryTimes[PH2H_Post]);
         runT5 = EffiPostMHLStage(ODpair, runtimes, PH2H_Cross, queryTimes[PH2H_Cross]);
-    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
-               algoChoice == static_cast<int>(HTSPIndex::DVPLwoV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    } else if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
+               algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) || algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
         runT1 = EffiVPLStage(ODpair, min(runtimes, 1000), Dijk, queryTimes[Dijk]);
         runT2 = EffiVPLStage(ODpair, min(runtimes, 1000), PCH_No, queryTimes[PCH_No]);
         if (algoUpdate >= PH2H_Post) {
@@ -4560,9 +4559,6 @@ pair<double, double> Graph::simulator_UpdateFirstVPL(vector<pair<int, int>> &ODp
                     if (i < PH2H_Cross) {
                         queryNum++;
                         query_j = query_processed_in_one_update_slot % ODpair.size();
-                        if (query_i != query_j) {
-                            cout << "unequal " << query_i << " " << query_j << endl;
-                        }
                         ID1 = ODpair[query_j].first, ID2 = ODpair[query_j].second; // query in processing
                         bool ifAff = judgeQueryAffect(ID1, ID2, partiAffectInfo[current_update_index], i);
                         if (ifAff) {//if affected
@@ -5912,10 +5908,12 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
     cout << "query number: " << ODpair.size() << endl;
 //    vector<vector<int>> clusterP;
 //    int clusterNum=4;
-    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
-        if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
+    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) {
+        if (algoChoice == static_cast<int>(HTSPIndex::DVPLwoR) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoRV) ||
+            algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO)) {
             regionNum = 1;
-            cout << "region number of DVPLwoR is set to " << regionNum << endl;
+            cout << "region number is set to " << regionNum << endl;
         }
         PartitionRegionCluster(regionNum, clusterP, ODpair);
     }
@@ -5929,7 +5927,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         ProBeginVertexSetParti.assign(partiNum, vector<int>());
         vertexIDChLParti.assign(partiNum, set<int>());
         ProBeginVertexSetPartiExtend.assign(partiNum, vector<int>());
-        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
+        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) {
             ProBeginVertexSetPartiInc.assign(partiNum, vector<int>());
             ProBeginVertexSetPartiExtendInc.assign(partiNum, vector<int>());
         }
@@ -5964,12 +5962,6 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
                 sourcePath + "/" + dataset + "_20160105_" + to_string(batchInterval) + ".batchUpdatesInfo", batchNum);
     }
     for (int i = 0; i < sampleBatch.size(); ++i) {
-//    for(int batch_i=0;batch_i<batchNum;++batch_i){
-//    for(int i=4;i<batchNum;++i){
-//        if(batch_i%gap>1){
-//        if(batch_i%gap>0){
-//            continue;
-//        }
         int batch_i = sampleBatch[i];
         stageDurations.assign(5, 0);
         uStageDurations.assign(5, 0);
@@ -6022,11 +6014,9 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         batchSizeSum = batchSizeSum + wBatchDec.size() + wBatchInc.size();
         count++;
         int id1 = 2, id2 = 3;
-        // index copy, obtaining old index 0
-        // query process by old index 0
 
         updateBatchID = batch_i;
-        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
+        if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) {
             tt.start();
             cout << "Mix update! Decrease size: " << wBatchDec.size() << " ; Increase size: " << wBatchInc.size()
                  << endl;
@@ -6101,7 +6091,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
 //        }
 
 //        EffiCheckStages(ODpair,runtimes,batchInterval,throughputNum,stageUpdateT,stageQueryT);
-        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoO) ||
+        if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
             algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             // get update stage duration
             vector<double> duration = StageDurationCompute(batchInterval);
@@ -6186,7 +6176,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         cout << "Average update time of U-Stage " << i + 1 << " : " << aveDuration[i] / batchNum << " s." << endl;
     }
     for (int i = 0; i < stageQueryT.size(); ++i) {
-        if ((algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) || algoChoice == Index_PostMHL) {
+        if ((algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) || algoChoice == Index_PostMHL) {
             if (i <= PCH_No) {
                 cout << "Average query time of Q-Stage " << i + 1 << " : " << get_mean(stageQueryT[i]) * 1000 << " ms"
                      << endl;
@@ -6201,7 +6191,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
     }
 
 //    exit(0);
-    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoO)) {
+    if (algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) {
         double aveThr = 0;
         for (int i = 0; i < throughputNums.size(); ++i) {
             aveThr += throughputNums[i];
@@ -7898,7 +7888,7 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
         int uNum = 0;
 //        VPLInnerUnaffectedPartiDetectByOracle(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,uNum,tDetect,partiAffectInfo[ci]);
 //        VPLShortcutUpdate(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,tSCU);
-        if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+        if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoRV) && algoChoice != static_cast<int>(HTSPIndex::DVPLwoRVO)) {
             boost::thread_group thread1;
             thread1.add_thread(new boost::thread(&Graph::VPLInnerUnaffectedPartiDetectByOracle, this,
                                                  boost::ref(partiBatchDecSchedule), boost::ref(partiBatchIncSchedule),
@@ -7953,7 +7943,7 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
 
                 /// Identify the unaffected partitions
                 double tDetect = 0;
-                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoRV) && algoChoice != static_cast<int>(HTSPIndex::DVPLwoRVO)) {
                     VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
                                                   partiAffectInfo[ci]);
                 }
@@ -7978,7 +7968,7 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
                 }
                 /// Identify the unaffected partitions
                 double tDetect = 0;
-                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoV)) {
+                if (algoChoice != static_cast<int>(HTSPIndex::DVPLwoRV) && algoChoice != static_cast<int>(HTSPIndex::DVPLwoRVO)) {
                     VPLUnaffectedPartiDetectTruth(overlayBatchDecSchedule, overlayBatchIncSchedule, tDetect,
                                                   partiAffectInfo[ci]);
                 }

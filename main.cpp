@@ -60,11 +60,12 @@ int main(int argc, char **argv) {
                 ("dataset,d", po::value<string>()->required(), "Name of dataset (required), e.g. NY")
                 ("index,i", po::value<int>()->required(),
                  "HTSP system index (required):\n"
+                 "  3 = PMHL\n"
                  "  5 = PostMHL\n"
                  "  6 = DVPL\n"
                  "  7 = DVPLwoR\n"
-                 "  8 = DVPLwoV\n"
-                 "  9 = DVPLwoO\n"
+                 "  8 = DVPLwoRV\n"
+                 "  9 = DVPLwoRVO\n"
                  "  10 = MVCC_PostMHL")
                 // Optional parameters (with original default values & variable names)
                 ("response_time,r", po::value<double>()->default_value(DEFAULT_RESPONSETIME),
@@ -217,10 +218,8 @@ int main(int argc, char **argv) {
     cout << "Query worker number: " << workerNum << endl;
 
     if (preTask == 1) {
-//        g.PH2HVertexOrdering(0);//MDE ordering
-//        g.PH2HVertexOrdering(1);//Boundary-first ordering
-//        g.PH2HVertexOrdering(2);//Naive Boundary-first MDE ordering
-        g.PH2HVertexOrdering(3);//Tree height-aware PSP ordering
+        g.PH2HVertexOrdering(2);//Naive Boundary-first MDE ordering
+//        g.PH2HVertexOrdering(3);//Tree height-aware PSP ordering
     } else if (preTask == 2) {
         g.QueryGenerationParti(true);//same partition and real-world simulation
     }
@@ -289,16 +288,18 @@ bool validateParameters(const string &algoParti, int algoQuery, int updateType, 
 HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
     // Check if input is in the range of legal enum values
     switch (inputIndex) {
+        case static_cast<int>(HTSPIndex::PMHL):
+            return HTSPIndex::PMHL;
         case static_cast<int>(HTSPIndex::PostMHL):
             return HTSPIndex::PostMHL;
         case static_cast<int>(HTSPIndex::DVPL):
             return HTSPIndex::DVPL;
         case static_cast<int>(HTSPIndex::DVPLwoR):
             return HTSPIndex::DVPLwoR;
-        case static_cast<int>(HTSPIndex::DVPLwoV):
-            return HTSPIndex::DVPLwoV;
-        case static_cast<int>(HTSPIndex::DVPLwoO):
-            return HTSPIndex::DVPLwoO;
+        case static_cast<int>(HTSPIndex::DVPLwoRV):
+            return HTSPIndex::DVPLwoRV;
+        case static_cast<int>(HTSPIndex::DVPLwoRVO):
+            return HTSPIndex::DVPLwoRVO;
         case static_cast<int>(HTSPIndex::MVCC_PostMHL):
             return HTSPIndex::MVCC_PostMHL;
         default:
@@ -306,11 +307,13 @@ HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
             throw invalid_argument(
                     "Invalid HTSP system index: " + to_string(inputIndex) +
                     "\nLegal values are:\n"
+                    "  3 = PMHL\n"
                     "  5 = PostMHL\n"
                     "  6 = DVPL\n"
                     "  7 = DVPLwoR\n"
-                    "  8 = DVPLwoV\n"
-                    "  9 = DVPLwoO"
+                    "  8 = DVPLwoRV\n"
+                    "  9 = DVPLwoRVO\n"
+                    "  10 = MVCC_PostMHL"
             );
     }
 }
@@ -320,8 +323,8 @@ string getHTSPIndexName(HTSPIndex index) {
         case HTSPIndex::PostMHL: return "PostMHL";
         case HTSPIndex::DVPL: return "DVPL";
         case HTSPIndex::DVPLwoR: return "DVPLwoR";
-        case HTSPIndex::DVPLwoV: return "DVPLwoV";
-        case HTSPIndex::DVPLwoO: return "DVPLwoO";
+        case HTSPIndex::DVPLwoRV: return "DVPLwoRV";
+        case HTSPIndex::DVPLwoRVO: return "DVPLwoRVO";
         default: return "UNKNOWN"; // Should never reach here (due to validation)
     }
 }

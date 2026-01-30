@@ -15615,6 +15615,21 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
                 }
             }
         }
+        // use cross-partition edge to avoid isolated partition
+        for (pid1 = 0; pid1 < partiNum; ++pid1) {
+            for (int i = 0; i < BoundVertex[pid1].size(); i++) {
+                int ID = BoundVertex[pid1][i];
+                for (auto it : NeighborsOverlay[ID]) {
+                    pid2 = PartiTag[it.first].first;
+                    if (pid2 != pid1) {
+                        if (SketchGraphQuery[pid1].find(pid2) == SketchGraphQuery[pid1].end()) {//if not found
+                            SketchGraphQuery[pid1].insert({pid2, 0});
+                            SketchGraphQuery[pid2].insert({pid1, 0});
+                        }
+                    }
+                }
+            }
+        }
 
         set<MaxComp> q;
         for (pid1 = 0; pid1 < partiNum; ++pid1) {
@@ -15626,7 +15641,7 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
             }
         }
 
-        int pNumUpper = ceil(partiNum / clusterNum);
+        int pNumUpper = ceil((float)partiNum / clusterNum);
         cout << "Expected cluster number: " << clusterNum << " ; average cluster size: " << pNumUpper << endl;
 
         vector<int> partiCluster(partiNum, -1);
@@ -15636,19 +15651,19 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
             auto item = q.begin();
             pid1 = item->pid1, pid2 = item->pid2;
             q.erase(q.begin());
-            if (partiCluster[pid1] == -1 && partiCluster[pid2] == -1) {
+            if (partiCluster[pid1] == -1 && partiCluster[pid2] == -1) { // Both are not assigned
                 vector<int> temp;
                 temp.push_back(pid1), partiCluster[pid1] = cluster1.size();
                 temp.push_back(pid2), partiCluster[pid2] = cluster1.size();
                 assignedNum += 2;
                 cluster1.push_back(temp);
-            } else if (partiCluster[pid1] == -1 && partiCluster[pid2] != -1) {//pid2 has been added
+            } else if (partiCluster[pid1] == -1 && partiCluster[pid2] != -1) { // pid2 has been assigned
                 if (cluster1[partiCluster[pid2]].size() < pNumUpper) {
                     cluster1[partiCluster[pid2]].push_back(pid1);
                     partiCluster[pid1] = partiCluster[pid2];
                     assignedNum++;
                 }
-            } else if (partiCluster[pid1] != -1 && partiCluster[pid2] == -1) {//pid1 has been added
+            } else if (partiCluster[pid1] != -1 && partiCluster[pid2] == -1) { // pid1 has been assigned
                 if (cluster1[partiCluster[pid1]].size() < pNumUpper) {
                     cluster1[partiCluster[pid1]].push_back(pid2);
                     partiCluster[pid2] = partiCluster[pid1];
@@ -15690,6 +15705,7 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
                 pqueue.extract_min(region, rSize);
                 reduceNum++;
                 set<pair<int, int>> neigh;
+                // assign the partitions in region to neighboring regions
                 for (int j = 0; j < cluster1[region].size(); ++j) {
                     pid1 = cluster1[region][j];
                     for (auto it = NeighborSketchB[pid1].begin(); it != NeighborSketchB[pid1].end(); ++it) {
@@ -15714,7 +15730,6 @@ void Graph::PartitionRegionCluster(int clusterNum, vector<vector<int>> &clusterP
                     cout << "wrong. neigh empty. " << region << endl;
                     exit(1);
                 }
-
             }
         }
     }

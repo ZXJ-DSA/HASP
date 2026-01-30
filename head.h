@@ -299,8 +299,8 @@ enum class HTSPIndex {
     PostMHL = 5,    // PostMHL Index
     DVPL = 6,       // DVPL Index
     DVPLwoR = 7,    // DVPL without Rotation update schedule
-    DVPLwoV = 8,    // DVPL without index Validation
-    DVPLwoO = 9,     // DVPL without tree height-aware ordering
+    DVPLwoRV = 8,    // DVPL without index Validation
+    DVPLwoRVO = 9,     // DVPL without tree height-aware ordering
     MVCC_PostMHL = 10   // MVCC + PostMHL
 };
 
