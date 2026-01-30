@@ -4617,7 +4617,7 @@ double Graph::ThroughputSimulate(vector<vector<double>> &query_costs, vector<vec
     tt.start();
     double l = 0, r = 2000000; // be careful of 'r'
     double throughput = 0.0;
-    int lambda;
+    long long int lambda;
     int gap = 1;
 
     r *= workerNum;
