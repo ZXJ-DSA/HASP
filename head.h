@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <random>
+#include <filesystem>
 #include "RTree.h"
 #include "Heap.h"
 //#include "labeling.hpp"
@@ -464,9 +465,9 @@ public:
     vector<vector<int>> clusterP;//record the regions, each contains several partitions
     vector<vector<double>> VPLUpdateTimes;//to record the detailed update time for VPL, <schedule,<U-Stages>>
     vector<vector<pair<bool, int>>> partiAffectInfo;//to record the affect info for each partition, <schedule,<parti,<V-Stage 1, V-stage 2(0: affected, 1: inner-unaffected, 2: unaffected)>>>
-    unordered_map<int, vector<query>> lambdaCache; //query list cache for different lambda;
-    vector<int> lambdaCount;
-    benchmark::heap<2, int, int> lambdaPQueue;//lambda and its appear number
+    unordered_map<long long int, vector<query>> lambdaCache; //query list cache for different lambda;
+    vector<long long int> lambdaCount;
+    benchmark::heap<2, long long int, int> lambdaPQueue;//lambda and its appear number
     int lambdaCacheSize = 20;
     vector<double> unaffectedQNum;
     vector<double> totalQNum;

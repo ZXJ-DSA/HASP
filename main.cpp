@@ -325,6 +325,7 @@ string getHTSPIndexName(HTSPIndex index) {
         case HTSPIndex::DVPLwoR: return "DVPLwoR";
         case HTSPIndex::DVPLwoRV: return "DVPLwoRV";
         case HTSPIndex::DVPLwoRVO: return "DVPLwoRVO";
+        case HTSPIndex::MVCC_PostMHL: return "MVCC_PostMHL";
         default: return "UNKNOWN"; // Should never reach here (due to validation)
     }
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(HTSP)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # boost
 # ADD: Add "program_options" to COMPONENTS (critical fix for parameter parsing)

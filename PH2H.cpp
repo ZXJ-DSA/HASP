@@ -906,6 +906,19 @@ void Graph::PostMHLIndexConstruct() {
 //    ReadGraph(sourcePath+"/"+dataset+".CH2");//
 //    ReadGraph(sourcePath+"/"+dataset+".time");//
 
+    try {
+        string tmpPath = sourcePath + "/tmp";
+        bool success = filesystem::create_directories(filesystem::path(tmpPath));
+
+        if (success) {
+            std::cout << "successfully create directory: " << tmpPath << std::endl;
+        } else {
+            std::cout << "directory already exist: " << tmpPath << std::endl;
+        }
+    } catch (const filesystem::filesystem_error& e) {
+        std::cerr << "failed to create directory: " << e.what() << std::endl;
+        exit(1);
+    }
     vSm.reserve(node_num);
     for (int i = 0; i < node_num; i++) {
         Semaphore *s = new Semaphore(1);
@@ -4643,7 +4656,8 @@ double Graph::ThroughputSimulate(vector<vector<double>> &query_costs, vector<vec
             } else {//if cache is not enough
                 if (lambdaCount[lambda] >
                     lambdaCount[lambdaPQueue.top_id()]) {//if this is more frequent than the top one in pqueue
-                    int topID, topCount;
+                    long long int topID;
+                    int topCount;
                     lambdaPQueue.extract_min(topID, topCount);
                     cout << "Replace " << topID << "(" << topCount << ") with " << lambda << "(" << lambdaCount[lambda]
                          << "). ";
@@ -4695,7 +4709,7 @@ double Graph::ThroughputSimulateReal(vector<vector<double>> &query_costs, vector
     tt.start();
     double l = 0, r = 2000000; // be careful of 'r'
     double throughput = 0.0;
-    int lambda;
+    long long int lambda;
     int gap = 1;
 
     r *= workerNum;
@@ -4721,7 +4735,8 @@ double Graph::ThroughputSimulateReal(vector<vector<double>> &query_costs, vector
             } else {//if cache is not enough
                 if (lambdaCount[lambda] >
                     lambdaCount[lambdaPQueue.top_id()]) {//if this is more frequent than the top one in pqueue
-                    int topID, topCount;
+                    long long int topID;
+                    int topCount;
                     lambdaPQueue.extract_min(topID, topCount);
                     cout << "Replace " << topID << "(" << topCount << ") with " << lambda << "(" << lambdaCount[lambda]
                          << "). ";
@@ -4771,7 +4786,7 @@ double Graph::ThroughputSimulateRealMVCC(vector<vector<double>> &query_costs, ve
     tt.start();
     double l = 0, r = 2000000; // be careful of 'r'
     double throughput = 0.0;
-    int lambda;
+    long long int lambda;
     int gap = 1;
     r *= workerNum;
     if (r > workerNum * 4 / queryTime) {
@@ -4795,7 +4810,8 @@ double Graph::ThroughputSimulateRealMVCC(vector<vector<double>> &query_costs, ve
             } else {//if cache is not enough
                 if (lambdaCount[lambda] >
                     lambdaCount[lambdaPQueue.top_id()]) {//if this is more frequent than the top one in pqueue
-                    int topID, topCount;
+                    long long int topID;
+                    int topCount;
                     lambdaPQueue.extract_min(topID, topCount);
                     cout << "Replace " << topID << "(" << topCount << ") with " << lambda << "(" << lambdaCount[lambda]
                          << "). ";
@@ -4846,7 +4862,7 @@ double Graph::ThroughputSimulateRealVPL(vector<pair<int, int>> &ODpair, vector<v
     tt.start();
     double l = 0, r = 2000000; // be careful of 'r'
     double throughput = 0.0;
-    int lambda;
+    long long int lambda;
     int gap = 1;
 
     r *= workerNum;
@@ -4872,7 +4888,8 @@ double Graph::ThroughputSimulateRealVPL(vector<pair<int, int>> &ODpair, vector<v
             } else {//if cache is not enough
                 if (lambdaCount[lambda] >
                     lambdaCount[lambdaPQueue.top_id()]) {//if this is more frequent than the top one in pqueue
-                    int topID, topCount;
+                    long long int topID;
+                    int topCount;
                     lambdaPQueue.extract_min(topID, topCount);
                     cout << "Replace " << topID << "(" << topCount << ") with " << lambda << "(" << lambdaCount[lambda]
                          << "). ";
@@ -6032,13 +6049,13 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
                 tRecord.start();
 //                    boost::thread_group thread;
 
-                if (algoChoice == 1) {
+                if (algoChoice == Index_MHL) {
 //                        thread.add_thread(new boost::thread(&Graph::DecBatchThroughputNP, this, boost::ref(wBatch), u, boost::ref(runT1)));
                     DecBatchThroughputNP(wBatchDec, batch_i, runT1);
-                } else if (algoChoice == 3) {
+                } else if (algoChoice == Index_PMHL || algoChoice == Index_PMHLNaive) {
 //                        thread.add_thread(new boost::thread(&Graph::PMHLBatchUpdateDec, this, boost::ref(wBatch), u, boost::ref(runT1)));
                     PMHLBatchUpdateDec(wBatchDec, batch_i, runT1);
-                } else if (algoChoice == 5) {
+                } else if (algoChoice == Index_PostMHL || algoChoice == static_cast<int>(HTSPIndex::MVCC_PostMHL)) {
 //                        thread.add_thread(new boost::thread(&Graph::PostMHLBatchUpdateDec, this, boost::ref(wBatch), u, boost::ref(runT1)));
                     PostMHLBatchUpdateDec(wBatchDec, batch_i, runT1);
                 }
@@ -6055,13 +6072,13 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
                 cout << "Increase update. " << wBatchInc.size() << endl;
 //            tRecord.start();
 ////            boost::thread_group thread;
-                if (algoChoice == 1) {
+                if (algoChoice == Index_MHL) {
 //                        thread.add_thread(new boost::thread(&Graph::IncBatchThroughputNP, this, boost::ref(wBatch), u, boost::ref(runT2)));
                     IncBatchThroughputNP(wBatchInc, batch_i, runT2);
-                } else if (algoChoice == 3) {
+                } else if (algoChoice == Index_PMHL || algoChoice == Index_PMHLNaive) {
 //                        thread.add_thread(new boost::thread(&Graph::PMHLBatchUpdateInc, this, boost::ref(wBatch), u, boost::ref(runT2)));
                     PMHLBatchUpdateInc(wBatchInc, batch_i, runT2);
-                } else if (algoChoice == 5) {
+                } else if (algoChoice == Index_PostMHL || algoChoice == static_cast<int>(HTSPIndex::MVCC_PostMHL)) {
 //                        thread.add_thread(new boost::thread(&Graph::PostMHLBatchUpdateInc, this, boost::ref(wBatch), u, boost::ref(runT2)));
                     PostMHLBatchUpdateInc(wBatchInc, batch_i, runT2);
                 }
@@ -6176,7 +6193,7 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         cout << "Average update time of U-Stage " << i + 1 << " : " << aveDuration[i] / batchNum << " s." << endl;
     }
     for (int i = 0; i < stageQueryT.size(); ++i) {
-        if ((algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) || algoChoice == Index_PostMHL) {
+        if ((algoChoice >= Index_DVPL && algoChoice <= static_cast<int>(HTSPIndex::DVPLwoRVO)) || algoChoice == Index_PostMHL || algoChoice == static_cast<int>(HTSPIndex::MVCC_PostMHL)) {
             if (i <= PCH_No) {
                 cout << "Average query time of Q-Stage " << i + 1 << " : " << get_mean(stageQueryT[i]) * 1000 << " ms"
                      << endl;
