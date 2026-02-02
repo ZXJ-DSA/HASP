@@ -6111,39 +6111,41 @@ void Graph::RealUpdateThroughputTestQueueModel(string updateFile, int batchNum, 
         if (algoChoice == Index_DVPL || algoChoice == static_cast<int>(HTSPIndex::DVPLwoRVO) ||
             algoChoice == static_cast<int>(HTSPIndex::DVPLwoR)) {
             // get update stage duration
-//            vector<double> duration = StageDurationCompute(batchInterval);
-//            double fastQT;
-//            for (int j = 0; j < duration.size(); ++j) {
-////                stageQueryT[j].clear();//new
-//                stageUpdateT[j].push_back(duration[j]);
-//                if (duration[j] > 0) {
-//                    fastQT = aveQT[j];
-//                }
-//            }
-//            // obtain the query during this batch interval
-//            vector<pair<int, int>> ODpairThis;
-//            for (query_i = 0; query_i < ODpairs[4].size(); ++query_i) {
-//                if (ODpairs[4][query_i].second >= 345600 + batchInterval * batch_i) {
-//                    if (ODpairs[4][query_i].second < 345600 + batchInterval * (batch_i + 1)) {
-//                        ODpairThis.emplace_back(ODpairs[4][query_i].first);
-//                    } else {
-//                        break;
-//                    }
-//                }
-//            }
-//            // obtain the query time
-//            vector<vector<double>> stageQueryThis(5, vector<double>());//(stage, query times)
-//            EffiStageCheckReal(ODpairThis, ODpairThis.size(), stageQueryThis);
-//            for (int j = 0; j < stageQueryThis.size(); ++j) {
-//                for (auto it = stageQueryThis[j].begin(); it != stageQueryThis[j].end(); ++it) {
-//                    stageQueryT[j].emplace_back(*it);
-//                }
-//            }
-//
-//            vector<vector<double>> durations;
-//            StageDurationComputeSchedule(batchInterval, durations);
-//            throughputNum = ThroughputSimulateRealVPL(ODpairThis, stageQueryThis, durations, batchInterval, T_r, batchInterval / clusterP.size(), fastQT, workerNum);//2 batches update
-//            throughputNums.push_back(throughputNum);
+            vector<double> duration = StageDurationCompute(batchInterval);
+            double fastQT;
+            for (int j = 0; j < duration.size(); ++j) {
+//                stageQueryT[j].clear();//new
+                stageUpdateT[j].push_back(duration[j]);
+                if (duration[j] > 0) {
+                    fastQT = aveQT[j];
+                }
+            }
+            // obtain the query during this batch interval
+            vector<pair<int, int>> ODpairThis;
+            for (query_i = 0; query_i < ODpairs[4].size(); ++query_i) {
+                if (ODpairs[4][query_i].second >= 345600 + batchInterval * batch_i) {
+                    if (ODpairs[4][query_i].second < 345600 + batchInterval * (batch_i + 1)) {
+                        ODpairThis.emplace_back(ODpairs[4][query_i].first);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            // obtain the query time
+            vector<vector<double>> stageQueryThis(5, vector<double>());//(stage, query times)
+            EffiStageCheckReal(ODpairThis, ODpairThis.size(), stageQueryThis);
+            for (int j = 0; j < stageQueryThis.size(); ++j) {
+                for (auto it = stageQueryThis[j].begin(); it != stageQueryThis[j].end(); ++it) {
+                    stageQueryT[j].emplace_back(*it);
+                }
+            }
+
+            vector<vector<double>> durations;
+            StageDurationComputeSchedule(batchInterval, durations);
+            throughputNum = ThroughputSimulateRealVPL(ODpairThis, stageQueryThis, durations, batchInterval, T_r,
+                                                      batchInterval / clusterP.size(), fastQT,
+                                                      workerNum);//2 batches update
+            throughputNums.push_back(throughputNum);
         }
         else {//other algorithms
             vector<double> duration = StageDurationCompute(batchInterval);
@@ -7915,13 +7917,6 @@ void Graph::VPLBatchUpdateMixSchedule(vector<pair<pair<int, int>, pair<int, int>
             thread1.join_all();
             cout << "Shortcut update time: " << tSCU << " s ; Oracle-based detect time: " << tDetect
                  << " s ; Inner-unaffected partition number by oracle: " << uNum << endl;
-            cout << "Inner-unaffected partition: ";
-            for (auto it : innerAffectedParti) {
-                if (!it) {
-                    cout << it << " ";
-                }
-            }
-            cout << endl;
         } else {
             VPLShortcutUpdate(partiBatchDecSchedule, partiBatchIncSchedule,overlayBatchDecSchedule,overlayBatchIncSchedule,tSCU);
             cout << "Shortcut update time: " << tSCU << " s" << endl;

@@ -1375,20 +1375,6 @@ void Graph::VPLUnaffectedPartiDetectTruth(vector<pair<pair<int, int>, pair<int, 
             }
         }
     }
-    cout << "Inner-unaffected partition: ";
-    for (int pi = 0; pi < partiAffectInfo.size(); ++pi) {
-        if (partiAffectInfo[pi].second == UNAFFIN) {
-            cout << pi << " ";
-        }
-    }
-    cout << endl;
-    cout << "Unaffected partition: ";
-    for (int pi = 0; pi < partiAffectInfo.size(); ++pi) {
-        if (partiAffectInfo[pi].second == UNAFF) {
-            cout << pi << " ";
-        }
-    }
-    cout << endl;
 }
 
 void Graph::VPLInnerUnaffectedPartiDetectByOracle(
