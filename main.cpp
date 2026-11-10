@@ -66,7 +66,13 @@ int main(int argc, char **argv) {
                  "  7 = DVPLwoR\n"
                  "  8 = DVPLwoRV\n"
                  "  9 = DVPLwoRVO\n"
+<<<<<<< HEAD
                  "  10 = MVCC_PostMHL")
+=======
+                 "  10 = MVCC_PostMHL\n"
+                 "  11 = DVPLwoV\n"
+                 "  12 = DVPLwoO")
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
                 // Optional parameters (with original default values & variable names)
                 ("response_time,r", po::value<double>()->default_value(DEFAULT_RESPONSETIME),
                  "Average query response time requirement (seconds), default: 1.0")
@@ -302,6 +308,13 @@ HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
             return HTSPIndex::DVPLwoRVO;
         case static_cast<int>(HTSPIndex::MVCC_PostMHL):
             return HTSPIndex::MVCC_PostMHL;
+<<<<<<< HEAD
+=======
+        case static_cast<int>(HTSPIndex::DVPLwoV):
+            return HTSPIndex::DVPLwoV;
+        case static_cast<int>(HTSPIndex::DVPLwoO):
+            return HTSPIndex::DVPLwoO;
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
         default:
             // Throw clear error (includes all legal values for user reference)
             throw invalid_argument(
@@ -313,7 +326,13 @@ HTSPIndex validateAndConvertHTSPIndex(int inputIndex) {
                     "  7 = DVPLwoR\n"
                     "  8 = DVPLwoRV\n"
                     "  9 = DVPLwoRVO\n"
+<<<<<<< HEAD
                     "  10 = MVCC_PostMHL"
+=======
+                    "  10 = MVCC_PostMHL\n"
+                    "  11 = DVPLwoV\n"
+                    "  12 = DVPLwoO"
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
             );
     }
 }
@@ -326,6 +345,11 @@ string getHTSPIndexName(HTSPIndex index) {
         case HTSPIndex::DVPLwoRV: return "DVPLwoRV";
         case HTSPIndex::DVPLwoRVO: return "DVPLwoRVO";
         case HTSPIndex::MVCC_PostMHL: return "MVCC_PostMHL";
+<<<<<<< HEAD
+=======
+        case HTSPIndex::DVPLwoV: return "DVPLwoV";
+        case HTSPIndex::DVPLwoO: return "DVPLwoO";
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
         default: return "UNKNOWN"; // Should never reach here (due to validation)
     }
 }

@@ -27,7 +27,12 @@ if (Boost_FOUND)
     endif()
     if(APPLE)
         # ADD: Link boost_program_options-mt for macOS (matches boost_thread-mt naming)
+<<<<<<< HEAD
         target_link_libraries(DPH2H boost_system boost_thread-mt boost_program_options-mt)# For mac
         target_link_libraries(DH2H boost_system boost_thread-mt boost_program_options-mt)# For mac
+=======
+        target_link_libraries(DPH2H boost_system boost_thread-mt boost_program_options)# For mac
+        target_link_libraries(DH2H boost_system boost_thread-mt boost_program_options)# For mac
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
     endif()
 endif ()

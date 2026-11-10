@@ -302,9 +302,19 @@ enum class HTSPIndex {
     DVPLwoR = 7,    // DVPL without Rotation update schedule
     DVPLwoRV = 8,    // DVPL without index Validation
     DVPLwoRVO = 9,     // DVPL without tree height-aware ordering
+<<<<<<< HEAD
     MVCC_PostMHL = 10   // MVCC + PostMHL
 };
 
+=======
+    MVCC_PostMHL = 10,   // MVCC + PostMHL
+    DVPLwoV = 11,        // DVPL without index Validation (keeps Rotation + tree height-aware ordering)
+    DVPLwoO = 12         // DVPL without tree height-aware ordering (keeps Rotation + Validation)
+};
+
+#define IS_DVPL_FAMILY(x) ((x) >= Index_DVPL && (x) <= static_cast<int>(HTSPIndex::DVPLwoRVO) || (x) == static_cast<int>(HTSPIndex::DVPLwoV) || (x) == static_cast<int>(HTSPIndex::DVPLwoO))
+
+>>>>>>> 1dc533f (feat: abalation study, v0.1)
 class Graph {
 public:
     string sourcePath;// the source path
